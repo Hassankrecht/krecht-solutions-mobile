@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'category_model.dart';
 
 class ProjectModel {
@@ -77,22 +79,46 @@ class ProjectModel {
       description: json['description']?.toString(),
       client: json['client']?.toString(),
       url: json['url']?.toString(),
-      image: json['image']?.toString(),
-      galleryImages: _stringList(json['gallery_images']),
-      video: json['video']?.toString(),
+      image: _firstString(json, [
+        'image',
+        'main_image',
+        'featured_image',
+        'thumbnail',
+        'cover_image',
+      ]),
+      galleryImages: _stringList(
+        json['gallery_images'] ??
+            json['gallery'] ??
+            json['images'] ??
+            json['photos'],
+      ),
+      video: _firstString(json, [
+        'video',
+        'video_url',
+        'video_path',
+        'video_file',
+      ]),
       technologies: json['technologies']?.toString(),
       technologiesEn: _stringList(json['technologies_en']),
       technologiesAr: _stringList(json['technologies_ar']),
-      categoryId: (json['category_id'] as num?)?.toInt(),
+      categoryId:
+          (json['category_id'] as num?)?.toInt() ??
+          (json['project_category_id'] as num?)?.toInt() ??
+          (json['categoryId'] as num?)?.toInt(),
       status: json['status']?.toString(),
       isActive: _boolValue(json['is_active'], fallback: true),
       order: (json['order'] as num?)?.toInt() ?? 0,
       completedAt: json['completed_at']?.toString(),
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
-      category: json['category'] != null && json['category'] is Map
+      category:
+          (json['category'] != null && json['category'] is Map) ||
+              (json['project_category'] != null &&
+                  json['project_category'] is Map)
           ? CategoryModel.fromJson(
-              Map<String, dynamic>.from(json['category'] as Map),
+              Map<String, dynamic>.from(
+                (json['category'] ?? json['project_category']) as Map,
+              ),
             )
           : null,
       categories: json['categories'] != null
@@ -195,18 +221,43 @@ class ProjectModel {
     if (value == null) return null;
     if (value is List) {
       return value
-          .map((e) => e?.toString().trim() ?? '')
+          .map((e) {
+            if (e is Map) {
+              return _firstString(e, ['url', 'path', 'image', 'file', 'src']) ??
+                  '';
+            }
+            return e?.toString().trim() ?? '';
+          })
           .where((s) => s.isNotEmpty)
           .toList();
     }
     if (value is String) {
       final trimmed = value.trim();
       if (trimmed.isEmpty) return null;
+      if (trimmed.startsWith('[')) {
+        try {
+          return _stringList(jsonDecode(trimmed));
+        } catch (_) {
+          // Fall through to comma splitting for non-JSON strings.
+        }
+      }
       return trimmed
           .split(',')
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
+    }
+    return null;
+  }
+
+  static String? _firstString(Map<dynamic, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      final value = json[key];
+      if (value == null) continue;
+      final stringValue = value.toString().trim();
+      if (stringValue.isNotEmpty && stringValue != 'null') {
+        return stringValue;
+      }
     }
     return null;
   }
