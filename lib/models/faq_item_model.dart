@@ -1,0 +1,45 @@
+class FaqItemModel {
+  const FaqItemModel({
+    required this.id,
+    required this.question,
+    required this.answer,
+    this.category,
+    this.order = 0,
+    this.isActive = true,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  final int id;
+  final String question;
+  final String answer;
+  final String? category;
+  final int order;
+  final bool isActive;
+  final String? createdAt;
+  final String? updatedAt;
+
+  factory FaqItemModel.fromJson(Map<String, dynamic> json) {
+    return FaqItemModel(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      question: json['question']?.toString() ?? '',
+      answer: json['answer']?.toString() ?? '',
+      category: json['category']?.toString(),
+      order: (json['order'] as num?)?.toInt() ?? 0,
+      isActive: json['is_active'] as bool? ?? true,
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'question': question,
+    'answer': answer,
+    'category': category,
+    'order': order,
+    'is_active': isActive,
+    'created_at': createdAt,
+    'updated_at': updatedAt,
+  };
+}
