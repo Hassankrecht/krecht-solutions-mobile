@@ -54,13 +54,40 @@ class _ServicesPageState extends State<ServicesPage> {
           return RefreshIndicator(
             color: AppColors.accentBlue,
             onRefresh: provider.fetchServices,
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: provider.services.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                return _ServiceCard(service: provider.services[index]);
-              },
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _ServicesHeader(count: provider.services.length),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                  sliver: SliverLayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = constraints.crossAxisExtent;
+                      final columns = width >= 900
+                          ? 3
+                          : width >= 620
+                          ? 2
+                          : 1;
+
+                      return SliverGrid(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columns,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
+                          mainAxisExtent: 224,
+                        ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _ServiceCard(
+                            service: provider.services[index],
+                          );
+                        }, childCount: provider.services.length),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -69,8 +96,77 @@ class _ServicesPageState extends State<ServicesPage> {
   }
 }
 
+class _ServicesHeader extends StatelessWidget {
+  const _ServicesHeader({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.darkNavy,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.contrast.withValues(alpha: 0.08)),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: AppColors.accentBlue.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: AppColors.contrast.withValues(alpha: 0.10),
+                ),
+              ),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                color: AppColors.accentBlue,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Professional Services',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.sectionTitle.copyWith(
+                      color: AppColors.contrast,
+                      fontSize: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    '$count solutions ready for your business',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.contrast.withValues(alpha: 0.72),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ServiceCard extends StatelessWidget {
   const _ServiceCard({required this.service});
+
   final Map<String, dynamic> service;
 
   @override
@@ -82,89 +178,160 @@ class _ServiceCard extends StatelessWidget {
         service['description'] as String? ??
         '';
     final icon = service['icon'] as String? ?? '';
+    final serviceIcon = _getIconForService(icon, title);
+    final accent = _getColorForService(icon, title);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: AppColors.accentBlue.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              _getIconForService(icon),
-              color: AppColors.accentBlue,
-              size: 28,
-            ),
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.of(context).pushNamed('/contact'),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.divider),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: AppTheme.cardShadow,
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppTextStyles.serviceTitle),
-                if (description.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(serviceIcon, color: accent, size: 27),
+                  ),
+                  const Spacer(),
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: AppColors.lightBackground,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      color: AppColors.bodyTextMuted.withValues(alpha: 0.78),
+                      size: 19,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.serviceTitle.copyWith(
+                  fontSize: 19,
+                  height: 1.18,
+                ),
+              ),
+              if (description.isNotEmpty) ...[
+                const SizedBox(height: 9),
+                Expanded(
+                  child: Text(
                     description,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodySmall,
-                  ),
-                ],
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/contact');
-                  },
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Read More',
-                    style: TextStyle(
-                      color: AppColors.accentBlue,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      height: 1.45,
+                      color: AppColors.bodyText.withValues(alpha: 0.72),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ] else
+                const Spacer(),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: accent,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Discuss this service',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.bodyTextMuted,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  IconData _getIconForService(String? icon) {
-    if (icon == null) return Icons.miscellaneous_services_rounded;
-    switch (icon.toLowerCase()) {
-      case 'web':
-      case 'website':
-        return Icons.web_rounded;
-      case 'mobile':
-      case 'app':
-        return Icons.phone_android_rounded;
-      case 'cloud':
-        return Icons.cloud_rounded;
-      case 'design':
-      case 'ui':
-        return Icons.design_services_rounded;
-      default:
-        return Icons.miscellaneous_services_rounded;
+  IconData _getIconForService(String? icon, String title) {
+    final value = '${icon ?? ''} $title'.toLowerCase();
+    if (value.contains('web') || value.contains('website')) {
+      return Icons.language_rounded;
     }
+    if (value.contains('mobile') || value.contains('app')) {
+      return Icons.phone_iphone_rounded;
+    }
+    if (value.contains('dashboard') || value.contains('admin')) {
+      return Icons.space_dashboard_rounded;
+    }
+    if (value.contains('cloud') || value.contains('hosting')) {
+      return Icons.cloud_done_rounded;
+    }
+    if (value.contains('design') ||
+        value.contains('ui') ||
+        value.contains('ux')) {
+      return Icons.draw_rounded;
+    }
+    if (value.contains('marketing') || value.contains('seo')) {
+      return Icons.campaign_rounded;
+    }
+    if (value.contains('ecommerce') || value.contains('shop')) {
+      return Icons.shopping_bag_rounded;
+    }
+    if (value.contains('support') || value.contains('maintenance')) {
+      return Icons.support_agent_rounded;
+    }
+    return Icons.auto_awesome_rounded;
+  }
+
+  Color _getColorForService(String? icon, String title) {
+    final value = '${icon ?? ''} $title'.toLowerCase();
+    if (value.contains('mobile') || value.contains('app')) {
+      return const Color(0xFF6C63FF);
+    }
+    if (value.contains('design') ||
+        value.contains('ui') ||
+        value.contains('ux')) {
+      return const Color(0xFFDB2777);
+    }
+    if (value.contains('cloud') || value.contains('hosting')) {
+      return const Color(0xFF0891B2);
+    }
+    if (value.contains('marketing') || value.contains('seo')) {
+      return const Color(0xFFEA580C);
+    }
+    if (value.contains('ecommerce') || value.contains('shop')) {
+      return const Color(0xFF16A34A);
+    }
+    return AppColors.accentBlue;
   }
 }
 

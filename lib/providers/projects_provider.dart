@@ -24,14 +24,19 @@ class ProjectsProvider extends ChangeNotifier {
 
   List<ProjectModel> get filteredProjects {
     if (_selectedCategory == null) return _projects;
-    return _projects
-        .where(
-          (project) =>
-              project.category?.id == _selectedCategory!.id ||
-              (project.categories?.any((c) => c.id == _selectedCategory!.id) ??
-                  false),
-        )
-        .toList();
+    return _projects.where(_matchesSelectedCategory).toList();
+  }
+
+  bool _matchesSelectedCategory(ProjectModel project) {
+    final selectedId = _selectedCategory!.id;
+
+    if (project.categoryId != null) {
+      return project.categoryId == selectedId;
+    }
+    if (project.category != null) {
+      return project.category!.id == selectedId;
+    }
+    return project.categories?.any((c) => c.id == selectedId) ?? false;
   }
 
   Future<void> fetchProjects({bool refresh = false}) async {

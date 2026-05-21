@@ -685,7 +685,7 @@ class _HeroSection extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
         child: Container(
-          height: 148,
+          height: 176,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
             gradient: const LinearGradient(
@@ -737,79 +737,100 @@ class _HeroSection extends StatelessWidget {
                   color: AppColors.contrast.withValues(alpha: 0.18),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(18),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Digital solutions, built cleanly',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.cardTitle.copyWith(
-                              color: AppColors.contrast,
-                              fontSize: 23,
-                              height: 1.1,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Apps, dashboards, websites, and systems.',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.contrast.withValues(alpha: 0.72),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          SizedBox(
-                            height: 38,
-                            child: FilledButton.icon(
-                              onPressed: () => Navigator.of(
-                                context,
-                              ).pushNamed(AppRoutes.projects),
-                              icon: const Icon(
-                                Icons.workspaces_rounded,
-                                size: 17,
-                              ),
-                              label: const Text('Explore Projects'),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.accentBlue,
-                                foregroundColor: AppColors.contrast,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isCompact = constraints.maxWidth < 340;
+
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Digital solutions, built cleanly',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.cardTitle.copyWith(
+                                  color: AppColors.contrast,
+                                  fontSize: isCompact ? 20 : 23,
+                                  height: 1.1,
                                 ),
                               ),
+                              const SizedBox(height: 7),
+                              Text(
+                                'Apps, dashboards, websites, and systems.',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.contrast.withValues(
+                                    alpha: 0.72,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                height: 36,
+                                child: FilledButton.icon(
+                                  onPressed: () => Navigator.of(
+                                    context,
+                                  ).pushNamed(AppRoutes.projects),
+                                  icon: const Icon(
+                                    Icons.workspaces_rounded,
+                                    size: 16,
+                                  ),
+                                  label: const Text(
+                                    'Explore Projects',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: AppColors.accentBlue,
+                                    foregroundColor: AppColors.contrast,
+                                    textStyle: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (!isCompact) ...[
+                          const SizedBox(width: 12),
+                          Container(
+                            width: 56,
+                            height: 76,
+                            decoration: BoxDecoration(
+                              color: AppColors.contrast.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: AppColors.contrast.withValues(
+                                  alpha: 0.12,
+                                ),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.rocket_launch_rounded,
+                              color: AppColors.accentBlue,
+                              size: 30,
                             ),
                           ),
                         ],
-                      ),
+                      ],
                     ),
-                    Container(
-                      width: 56,
-                      height: 76,
-                      decoration: BoxDecoration(
-                        color: AppColors.contrast.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AppColors.contrast.withValues(alpha: 0.12),
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.rocket_launch_rounded,
-                        color: AppColors.accentBlue,
-                        size: 30,
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ],
           ),

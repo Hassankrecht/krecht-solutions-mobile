@@ -218,16 +218,27 @@ class _PackagesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1,
-          childAspectRatio: 1.4,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-        ),
-        delegate: SliverChildBuilderDelegate((context, index) {
-          return _PackageCard(package: packages[index], isArabic: isArabic);
-        }, childCount: packages.length),
+      sliver: SliverLayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.crossAxisExtent;
+          final columns = width >= 900
+              ? 3
+              : width >= 620
+              ? 2
+              : 1;
+
+          return SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              mainAxisExtent: 330,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return _PackageCard(package: packages[index], isArabic: isArabic);
+            }, childCount: packages.length),
+          );
+        },
       ),
     );
   }
@@ -293,6 +304,8 @@ class _PackageCard extends StatelessWidget {
                 const Spacer(),
                 Text(
                   package.formattedPrice,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.heroTitleMobile.copyWith(
                     color: AppColors.accentBlue,
                     fontSize: 28,
@@ -306,7 +319,11 @@ class _PackageCard extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 44),
                   ),
-                  child: const Text('View Details'),
+                  child: const Text(
+                    'View Details',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),

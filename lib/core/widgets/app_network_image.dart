@@ -24,6 +24,7 @@ class AppNetworkImage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (kIsWeb) {
       return Image.network(
+        key: ValueKey(imageUrl),
         imageUrl,
         fit: fit,
         width: width,
@@ -42,6 +43,7 @@ class AppNetworkImage extends StatelessWidget {
     }
 
     return CachedNetworkImage(
+      key: ValueKey(imageUrl),
       imageUrl: imageUrl,
       fit: fit,
       width: width,
