@@ -4,6 +4,7 @@ import '../core/api/api_exception.dart';
 import '../models/project_model.dart';
 import '../models/category_model.dart';
 
+// Manages project list, project details, categories, filters, loading, and errors.
 class ProjectsProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
@@ -22,11 +23,13 @@ class ProjectsProvider extends ChangeNotifier {
   List<CategoryModel> get categories => _categories;
   CategoryModel? get selectedCategory => _selectedCategory;
 
+  // Applies the selected project category without mutating the full list.
   List<ProjectModel> get filteredProjects {
     if (_selectedCategory == null) return _projects;
     return _projects.where(_matchesSelectedCategory).toList();
   }
 
+  // Handles projects that may store category as id, object, or list.
   bool _matchesSelectedCategory(ProjectModel project) {
     final selectedId = _selectedCategory!.id;
 
@@ -39,6 +42,7 @@ class ProjectsProvider extends ChangeNotifier {
     return project.categories?.any((c) => c.id == selectedId) ?? false;
   }
 
+  // Fetches project list data and optionally resets previous results.
   Future<void> fetchProjects({bool refresh = false}) async {
     if (refresh) {
       _currentPage = 1;
@@ -75,6 +79,7 @@ class ProjectsProvider extends ChangeNotifier {
     }
   }
 
+  // Fetches available project categories for filtering.
   Future<void> fetchCategories() async {
     try {
       final res = await ApiClient.instance.getProjectCategories();
@@ -93,16 +98,19 @@ class ProjectsProvider extends ChangeNotifier {
     }
   }
 
+  // Stores the active category filter.
   void selectCategory(CategoryModel? category) {
     _selectedCategory = category;
     notifyListeners();
   }
 
+  // Removes the category filter and shows all projects.
   void clearCategory() {
     _selectedCategory = null;
     notifyListeners();
   }
 
+  // Fetches one project for the details page.
   Future<void> fetchProjectDetails(String id) async {
     _isLoading = true;
     _error = null;

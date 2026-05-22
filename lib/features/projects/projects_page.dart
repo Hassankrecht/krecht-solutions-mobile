@@ -13,6 +13,7 @@ import '../../providers/language_provider.dart';
 import '../../providers/projects_provider.dart';
 import '../../routes/app_routes.dart';
 
+// Projects index page with category filtering and responsive project cards.
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
 
@@ -88,26 +89,40 @@ class _ProjectsPageState extends State<ProjectsPage> {
                 if (projects.isEmpty)
                   const SliverFillRemaining(child: _EmptyState())
                 else
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-                    sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 360,
-                            childAspectRatio: 0.95,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final project = projects[index];
-                        return _ProjectCard(
-                          key: ValueKey('project-${project.id}'),
-                          project: project,
-                          categories: provider.categories,
-                          isArabic: isArabic,
-                        );
-                      }, childCount: projects.length),
-                    ),
+                  SliverLayoutBuilder(
+                    builder: (context, constraints) {
+                      final availableWidth = (constraints.crossAxisExtent - 32)
+                          .clamp(280.0, double.infinity)
+                          .toDouble();
+                      final isCompact = availableWidth < 640;
+
+                      return SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: isCompact
+                                    ? availableWidth
+                                    : 360,
+                                mainAxisExtent: isCompact ? 440 : 420,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                              ),
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final project = projects[index];
+                            return _ProjectCard(
+                              key: ValueKey('project-${project.id}'),
+                              project: project,
+                              categories: provider.categories,
+                              isArabic: isArabic,
+                            );
+                          }, childCount: projects.length),
+                        ),
+                      );
+                    },
                   ),
               ],
             ),
@@ -118,6 +133,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
   }
 }
 
+// Dark summary box below the app bar with project count and category filter.
 class _ProjectsHeader extends StatelessWidget {
   const _ProjectsHeader({
     required this.projectCount,
@@ -137,32 +153,79 @@ class _ProjectsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Our Work', style: AppTextStyles.sectionTitle),
-          const SizedBox(height: 6),
-          Text(
-            '$projectCount project${projectCount == 1 ? '' : 's'} available',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.bodyTextMuted,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.darkNavy,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.contrast.withValues(alpha: 0.08)),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: AppColors.accentBlue.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.contrast.withValues(alpha: 0.10),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.folder_special_rounded,
+                    color: AppColors.accentBlue,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Our Work',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.sectionTitle.copyWith(
+                          color: AppColors.contrast,
+                          fontSize: 24,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        '$projectCount project${projectCount == 1 ? '' : 's'} available',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.contrast.withValues(alpha: 0.72),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-          if (categories.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            _CategoryMenu(
-              categories: categories,
-              selectedCategory: selectedCategory,
-              isArabic: isArabic,
-              onChanged: onCategoryChanged,
-            ),
+            if (categories.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _CategoryMenu(
+                categories: categories,
+                selectedCategory: selectedCategory,
+                isArabic: isArabic,
+                onChanged: onCategoryChanged,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 }
 
+// Dropdown filter that switches between all projects and one category.
 class _CategoryMenu extends StatelessWidget {
   const _CategoryMenu({
     required this.categories,
@@ -201,7 +264,12 @@ class _CategoryMenu extends StatelessWidget {
                 children: [
                   Icon(Icons.grid_view_rounded, size: 18),
                   SizedBox(width: 10),
-                  Text('All categories'),
+                  Expanded(
+                    child: Text(
+                      'All categories',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -241,6 +309,7 @@ class _CategoryMenu extends StatelessWidget {
   }
 }
 
+// Project list card that opens the project details screen.
 class _ProjectCard extends StatelessWidget {
   const _ProjectCard({
     super.key,
@@ -257,7 +326,7 @@ class _ProjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final imageUrl = _projectImageUrl(project);
     final title = project.getLocalizedTitle(isArabic);
-    final description = project.getLocalizedShortDescription(isArabic);
+    final description = _cardDescription(project, isArabic);
     final categoryName = _categoryName(project, categories, isArabic);
 
     return InkWell(
@@ -310,24 +379,31 @@ class _ProjectCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-                    Expanded(
-                      child: Text(
-                        description,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.bodyText.withValues(alpha: 0.78),
+                    if (description.isNotEmpty)
+                      Expanded(
+                        child: Text(
+                          description,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.bodyText.withValues(alpha: 0.78),
+                          ),
                         ),
-                      ),
-                    ),
+                      )
+                    else
+                      const Spacer(),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Text(
-                          'View details',
-                          style: AppTextStyles.buttonLabel.copyWith(
-                            color: AppColors.accentBlue,
-                            letterSpacing: 0,
+                        Expanded(
+                          child: Text(
+                            'View details',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.buttonLabel.copyWith(
+                              color: AppColors.accentBlue,
+                              letterSpacing: 0,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -348,6 +424,34 @@ class _ProjectCard extends StatelessWidget {
     );
   }
 
+  // Builds a compact project description preview for the index card.
+  String _cardDescription(ProjectModel project, bool isArabic) {
+    final candidates = [
+      project.getLocalizedShortDescription(isArabic),
+      project.getLocalizedDescription(isArabic),
+      project.getLocalizedContent(isArabic),
+    ];
+
+    for (final candidate in candidates) {
+      final normalized = _plainTextSnippet(candidate);
+      if (normalized.isNotEmpty) return normalized;
+    }
+    return '';
+  }
+
+  String _plainTextSnippet(String value) {
+    final text = value
+        .replaceAll(RegExp(r'<[^>]*>'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (text.length <= 180) return text;
+
+    final boundary = text.lastIndexOf(' ', 180);
+    final end = boundary >= 120 ? boundary : 180;
+    return '${text.substring(0, end).trim()}...';
+  }
+
+  // Adds an update timestamp query value so changed images refresh in cache.
   String? _projectImageUrl(ProjectModel project) {
     return _withVersion(
       ImageHelper.buildImageUrl(project.image ?? ''),
@@ -355,6 +459,7 @@ class _ProjectCard extends StatelessWidget {
     );
   }
 
+  // Resolves the visible category name from available project/category data.
   String _categoryName(
     ProjectModel project,
     List<CategoryModel> allCategories,
@@ -378,6 +483,7 @@ class _ProjectCard extends StatelessWidget {
     return '';
   }
 
+  // Cache-busting helper used for project images.
   String? _withVersion(String? url, String? version) {
     if (url == null || url.isEmpty || version == null || version.isEmpty) {
       return url;
@@ -387,6 +493,7 @@ class _ProjectCard extends StatelessWidget {
   }
 }
 
+// Small category label displayed on project cards.
 class _CategoryBadge extends StatelessWidget {
   const _CategoryBadge({required this.label});
 
@@ -394,26 +501,34 @@ class _CategoryBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.accentBlue.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: AppColors.accentBlue,
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.accentBlue.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.accentBlue,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
+// Placeholder shown when a project has no image or image loading fails.
 class _ImagePlaceholder extends StatelessWidget {
   const _ImagePlaceholder();
 
@@ -432,6 +547,7 @@ class _ImagePlaceholder extends StatelessWidget {
   }
 }
 
+// Empty state shown when there are no projects to display.
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
@@ -461,6 +577,7 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+// Error state with retry action for failed project loading.
 class _ErrorState extends StatelessWidget {
   const _ErrorState({required this.message, required this.onRetry});
 

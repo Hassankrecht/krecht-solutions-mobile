@@ -17,9 +17,11 @@ import 'features/settings/data_usage_page.dart';
 import 'features/settings/faq_page.dart';
 import 'features/settings/maintenance_screen.dart';
 import 'providers/language_provider.dart';
+import 'providers/app_provider.dart';
 import 'providers/settings_provider.dart';
 import 'routes/app_routes.dart';
 
+// Root widget responsible for theme, localization, maintenance mode, and routes.
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -27,14 +29,17 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     final settingsProvider = context.watch<SettingsProvider>();
     final languageProvider = context.watch<LanguageProvider>();
+    final appProvider = context.watch<AppProvider>();
 
+    // When maintenance mode is enabled, block normal navigation and show only
+    // the maintenance screen with the current language direction.
     if (settingsProvider.isInMaintenanceMode) {
       return MaterialApp(
         title: 'Krecht Solutions',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system,
+        themeMode: appProvider.themeMode,
         locale: languageProvider.locale,
         localizationsDelegates: const [
           AppLocalizations.delegate,
@@ -55,7 +60,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: appProvider.themeMode,
       locale: languageProvider.locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -66,6 +71,7 @@ class App extends StatelessWidget {
       supportedLocales: const [Locale('en'), Locale('ar')],
       initialRoute: AppRoutes.shell,
       onGenerateRoute: (settings) {
+        // Project detail routes include the project id after /projects/.
         if (settings.name?.startsWith('${AppRoutes.projects}/') == true) {
           final projectId = settings.name!.split('/').last;
           return MaterialPageRoute(
@@ -88,6 +94,7 @@ class App extends StatelessWidget {
         AppRoutes.faq: (_) => const FaqPage(),
       },
       builder: (context, child) {
+        // Applies LTR/RTL direction globally based on the selected language.
         return Directionality(
           textDirection: languageProvider.textDirection,
           child: child!,

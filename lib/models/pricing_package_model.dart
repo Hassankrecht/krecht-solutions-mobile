@@ -1,3 +1,4 @@
+// Pricing package data model used by pricing pages and home previews.
 class PricingPackageModel {
   const PricingPackageModel({
     required this.id,
@@ -50,6 +51,7 @@ class PricingPackageModel {
   final List<String>? featuresEn;
   final List<String>? featuresAr;
 
+  // Creates a pricing package from API JSON with bilingual fields.
   factory PricingPackageModel.fromJson(Map<String, dynamic> json) {
     return PricingPackageModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
@@ -116,18 +118,21 @@ class PricingPackageModel {
     'features_ar': featuresAr,
   };
 
+  // Returns Arabic name when active and available, otherwise English/default.
   String getLocalizedName(bool isArabic) {
     return isArabic && nameAr != null && nameAr!.isNotEmpty
         ? nameAr!
         : (nameEn ?? name ?? '');
   }
 
+  // Returns Arabic description when active and available.
   String getLocalizedDescription(bool isArabic) {
     return isArabic && descriptionAr != null && descriptionAr!.isNotEmpty
         ? descriptionAr!
         : (descriptionEn ?? description ?? '');
   }
 
+  // Returns localized feature bullets.
   List<String> getLocalizedFeatures(bool isArabic) {
     if (isArabic && featuresAr != null && featuresAr!.isNotEmpty) {
       return featuresAr!;
@@ -135,10 +140,12 @@ class PricingPackageModel {
     return featuresEn ?? [];
   }
 
+  // Price string ready for UI formatting.
   String get formattedPrice {
     return price ?? '';
   }
 
+  // Returns localized category label.
   String getLocalizedCategory(bool isArabic) {
     return isArabic && categoryAr != null && categoryAr!.isNotEmpty
         ? categoryAr!

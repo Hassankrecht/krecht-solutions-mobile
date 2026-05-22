@@ -1,3 +1,4 @@
+// Pricing category data model used to filter pricing packages.
 class PricingCategoryModel {
   const PricingCategoryModel({
     required this.id,
@@ -32,6 +33,7 @@ class PricingCategoryModel {
   final String? descriptionEn;
   final String? descriptionAr;
 
+  // Creates a pricing category from API JSON with safe fallback values.
   factory PricingCategoryModel.fromJson(Map<String, dynamic> json) {
     return PricingCategoryModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
@@ -67,12 +69,14 @@ class PricingCategoryModel {
     'description_ar': descriptionAr,
   };
 
+  // Returns Arabic name when active and available, otherwise English/default.
   String getLocalizedName(bool isArabic) {
     return isArabic && nameAr != null && nameAr!.isNotEmpty
         ? nameAr!
         : (nameEn ?? name ?? '');
   }
 
+  // Returns Arabic description when active and available.
   String getLocalizedDescription(bool isArabic) {
     return isArabic && descriptionAr != null && descriptionAr!.isNotEmpty
         ? descriptionAr!

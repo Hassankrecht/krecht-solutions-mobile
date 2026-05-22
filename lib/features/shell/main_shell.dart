@@ -7,6 +7,7 @@ import '../services/services_page.dart';
 import '../packages/packages_page.dart';
 import '../settings/settings_page.dart';
 
+// Main app shell with top bar, search field, bottom navigation, and tab pages.
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -91,6 +92,7 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  // Opens the inline search field and moves focus into it.
   void _openSearch() {
     setState(() => _isSearchOpen = true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -100,6 +102,7 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
+  // Clears and closes the inline search field.
   void _closeSearch() {
     _searchController.clear();
     _searchFocusNode.unfocus();
@@ -114,6 +117,7 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
+// Brand block shown in the shell app bar.
 class _BrandTitle extends StatelessWidget {
   const _BrandTitle({super.key});
 
@@ -166,6 +170,7 @@ class _BrandTitle extends StatelessWidget {
   }
 }
 
+// Search input shown inside the top app bar.
 class _InlineSearchField extends StatelessWidget {
   const _InlineSearchField({
     super.key,
@@ -229,6 +234,7 @@ class _InlineSearchField extends StatelessWidget {
   }
 }
 
+// Data holder for one bottom navigation tab.
 class _NavItem {
   const _NavItem({
     required this.icon,
@@ -241,6 +247,7 @@ class _NavItem {
   final String label;
 }
 
+// Bottom navigation container that renders each configured tab.
 class _BottomNav extends StatelessWidget {
   const _BottomNav({
     required this.selectedIndex,
@@ -286,6 +293,7 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
+// One bottom navigation item with selected/unselected styling.
 class _NavBarItem extends StatelessWidget {
   const _NavBarItem({
     required this.item,

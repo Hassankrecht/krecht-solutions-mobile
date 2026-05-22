@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/theme/app_colors.dart';
-import '../../models/app_setting_model.dart';
+import '../../providers/settings_provider.dart';
 
+// Contact screen with a submit form and optional company contact details.
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
 
@@ -22,14 +24,7 @@ class _ContactPageState extends State<ContactPage> {
 
   bool _isLoading = false;
   bool _submitted = false;
-  final bool _isSettingsLoading = false;
   String? _error;
-  AppSettingModel? _settings;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -41,6 +36,7 @@ class _ContactPageState extends State<ContactPage> {
     super.dispose();
   }
 
+  // Validates the form and sends the contact message to the API.
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() {
@@ -85,33 +81,24 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
+  // Builds the top contact-info area plus the message form.
   Widget _buildContent() {
     return Column(
       children: [
-        if (!_isSettingsLoading && _settings != null) _buildContactInfo(),
+        _buildContactInfo(),
         Expanded(child: _buildForm()),
       ],
     );
   }
 
+  // Shows local company contact actions.
   Widget _buildContactInfo() {
-    final phone = _settings?.get('contact_phone');
-    final email = _settings?.get('contact_email');
-    final location = _settings?.get('contact_location');
-    final whatsapp = _settings?.get('contact_whatsapp');
-    final facebook = _settings?.get('social_facebook');
-    final twitter = _settings?.get('social_twitter');
-    final instagram = _settings?.get('social_instagram');
-    final linkedin = _settings?.get('social_linkedin');
+    final settings = context.watch<SettingsProvider>().appSettings;
+    final phone = settings?.contactPhone ?? '';
+    final email = settings?.contactEmail ?? '';
+    final whatsapp = settings?.whatsappNumber ?? '';
 
-    if (phone == null &&
-        email == null &&
-        location == null &&
-        whatsapp == null &&
-        facebook == null &&
-        twitter == null &&
-        instagram == null &&
-        linkedin == null) {
+    if (phone.isEmpty && email.isEmpty && whatsapp.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -134,67 +121,34 @@ class _ContactPageState extends State<ContactPage> {
             ),
           ),
           const SizedBox(height: 16),
-          if (phone != null)
+          if (phone.isNotEmpty)
             _ContactTile(
-              icon: Icons.phone,
-              label: 'Phone',
+              icon: Icons.call_outlined,
+              label: 'Call',
               value: phone,
               onTap: () => _launchUrl('tel:$phone'),
             ),
-          if (email != null)
+          if (whatsapp.isNotEmpty)
             _ContactTile(
-              icon: Icons.email,
+              icon: Icons.chat_outlined,
+              label: 'WhatsApp',
+              value: whatsapp,
+              onTap: () => _launchUrl('https://wa.me/${_digitsOnly(whatsapp)}'),
+            ),
+          if (email.isNotEmpty)
+            _ContactTile(
+              icon: Icons.email_outlined,
               label: 'Email',
               value: email,
               onTap: () => _launchUrl('mailto:$email'),
             ),
-          if (location != null)
-            _ContactTile(
-              icon: Icons.location_on,
-              label: 'Location',
-              value: location,
-              onTap: () => _launchUrl(
-                'https://maps.google.com/?q=${Uri.encodeComponent(location)}',
-              ),
-            ),
-          if (whatsapp != null)
-            _ContactTile(
-              icon: Icons.chat,
-              label: 'WhatsApp',
-              value: whatsapp,
-              onTap: () => _launchUrl('https://wa.me/$whatsapp'),
-            ),
-          if (facebook != null ||
-              twitter != null ||
-              instagram != null ||
-              linkedin != null) ...[
-            const SizedBox(height: 8),
-            const Text(
-              'Follow Us',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.darkNavy,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 12,
-              children: [
-                if (facebook != null)
-                  _SocialButton(icon: Icons.facebook, url: facebook),
-                if (twitter != null)
-                  _SocialButton(icon: Icons.alternate_email, url: twitter),
-                if (instagram != null)
-                  _SocialButton(icon: Icons.camera_alt, url: instagram),
-                if (linkedin != null)
-                  _SocialButton(icon: Icons.work, url: linkedin),
-              ],
-            ),
-          ],
         ],
       ),
     );
+  }
+
+  String _digitsOnly(String value) {
+    return value.replaceAll(RegExp(r'\D'), '');
   }
 
   Future<void> _launchUrl(String urlString) async {
@@ -332,6 +286,7 @@ class _ContactPageState extends State<ContactPage> {
   }
 }
 
+// Standard text field used by the contact form.
 class _Field extends StatelessWidget {
   const _Field({
     required this.controller,
@@ -370,6 +325,7 @@ class _Field extends StatelessWidget {
   }
 }
 
+// Confirmation screen shown after the contact form submits successfully.
 class _SuccessState extends StatelessWidget {
   const _SuccessState();
 
@@ -420,6 +376,7 @@ class _SuccessState extends StatelessWidget {
   }
 }
 
+// Contact detail row that can optionally open phone, email, or link actions.
 class _ContactTile extends StatelessWidget {
   const _ContactTile({
     required this.icon,
@@ -478,35 +435,6 @@ class _ContactTile extends StatelessWidget {
               Icon(Icons.open_in_new, size: 16, color: AppColors.bodyTextMuted),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({required this.icon, required this.url});
-
-  final IconData icon;
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        final uri = Uri.parse(url);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri);
-        }
-      },
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: AppColors.darkNavy,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Icon(icon, size: 20, color: AppColors.contrast),
       ),
     );
   }

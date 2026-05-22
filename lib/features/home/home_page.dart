@@ -16,6 +16,7 @@ import '../../providers/pricing_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../routes/app_routes.dart';
 
+// Home dashboard that loads preview data for services, projects, pricing, and contact CTA.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -35,6 +36,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Loads all home data in parallel so the page can render complete previews.
   Future<void> _fetchData() async {
     setState(() {
       _isLoading = true;
@@ -63,6 +65,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Opens the configured WhatsApp number from app settings.
   Future<void> _launchWhatsApp() async {
     final settingsProvider = context.read<SettingsProvider>();
     final whatsapp = settingsProvider.appSettings?.whatsappNumber;
@@ -97,6 +100,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+// Loading state used while home preview data is being fetched.
 class _LoadingState extends StatelessWidget {
   const _LoadingState();
 
@@ -108,6 +112,7 @@ class _LoadingState extends StatelessWidget {
   }
 }
 
+// Error state used when one of the home data requests fails.
 class _ErrorState extends StatelessWidget {
   const _ErrorState({required this.message, required this.onRetry});
 
@@ -138,15 +143,18 @@ class _ErrorState extends StatelessWidget {
   }
 }
 
+// Contact call-to-action shown when email, phone, or WhatsApp settings exist.
 class _ContactCTA extends StatelessWidget {
   const _ContactCTA();
 
+  // Opens contact actions outside the app.
   Future<void> _launch(Uri uri) async {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
+  // Removes formatting characters before building phone/WhatsApp URLs.
   String _digitsOnly(String value) {
     return value.replaceAll(RegExp(r'[^0-9+]'), '');
   }
@@ -228,6 +236,7 @@ class _ContactCTA extends StatelessWidget {
   }
 }
 
+// Compact button used inside the home contact CTA.
 class _ContactAction extends StatelessWidget {
   const _ContactAction({
     required this.icon,
@@ -255,6 +264,7 @@ class _ContactAction extends StatelessWidget {
   }
 }
 
+// Main scrollable home content assembled from preview sections.
 class _HomeContent extends StatelessWidget {
   const _HomeContent();
 
@@ -327,6 +337,7 @@ class _HomeContent extends StatelessWidget {
   }
 }
 
+// Home preview of pricing packages with local category filtering.
 class _PricingPreview extends StatefulWidget {
   const _PricingPreview({required this.packages, required this.categories});
 
@@ -340,6 +351,7 @@ class _PricingPreview extends StatefulWidget {
 class _PricingPreviewState extends State<_PricingPreview> {
   int? _selectedCategoryId;
 
+  // Filters packages by the selected category chip.
   List<PricingPackageModel> get _filteredPackages {
     if (_selectedCategoryId == null) return widget.packages;
     return widget.packages
@@ -416,6 +428,7 @@ class _PricingPreviewState extends State<_PricingPreview> {
   }
 }
 
+// Horizontal pricing category filter for the home preview.
 class _HomePricingCategoryFilter extends StatelessWidget {
   const _HomePricingCategoryFilter({
     required this.categories,
@@ -460,6 +473,7 @@ class _HomePricingCategoryFilter extends StatelessWidget {
   }
 }
 
+// Selectable category chip used by the home pricing preview.
 class _HomePricingCategoryChip extends StatelessWidget {
   const _HomePricingCategoryChip({
     required this.label,
@@ -505,6 +519,7 @@ class _HomePricingCategoryChip extends StatelessWidget {
   }
 }
 
+// Empty state shown when the selected pricing category has no packages.
 class _EmptyPricingFilterState extends StatelessWidget {
   const _EmptyPricingFilterState();
 
@@ -526,6 +541,7 @@ class _EmptyPricingFilterState extends StatelessWidget {
   }
 }
 
+// Compact pricing package card shown in the horizontal home preview.
 class _PricingCard extends StatelessWidget {
   const _PricingCard({required this.packageData, required this.isArabic});
 
@@ -668,6 +684,7 @@ class _PricingCard extends StatelessWidget {
     );
   }
 
+  // Normalizes raw price strings before displaying them.
   String _formatPrice(String value) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return 'Price on request';
@@ -676,6 +693,7 @@ class _PricingCard extends StatelessWidget {
   }
 }
 
+// Top hero card for the home screen.
 class _HeroSection extends StatelessWidget {
   const _HeroSection();
 
@@ -684,121 +702,135 @@ class _HeroSection extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
-        child: Container(
-          height: 176,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.darkNavy, AppColors.header],
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: AppColors.shadowMedium,
-                blurRadius: 24,
-                offset: Offset(0, 12),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            children: [
-              Positioned(
-                right: -18,
-                top: 18,
-                child: Container(
-                  width: 82,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    color: AppColors.accentBlue.withValues(alpha: 0.34),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 14,
-                top: 46,
-                child: Container(
-                  width: 54,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    color: AppColors.contrast.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 24,
-                bottom: 18,
-                child: Icon(
-                  Icons.dashboard_customize_rounded,
-                  size: 54,
-                  color: AppColors.contrast.withValues(alpha: 0.18),
-                ),
-              ),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final isCompact = constraints.maxWidth < 340;
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 360;
+            final isVeryCompact = constraints.maxWidth < 300;
 
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
+            return Container(
+              constraints: BoxConstraints(minHeight: isCompact ? 188 : 176),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(isCompact ? 18 : 22),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.darkNavy, AppColors.header],
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.shadowMedium,
+                    blurRadius: 24,
+                    offset: Offset(0, 12),
+                  ),
+                ],
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: -18,
+                    top: 18,
+                    child: Container(
+                      width: 82,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: AppColors.accentBlue.withValues(alpha: 0.34),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  if (!isVeryCompact)
+                    Positioned(
+                      right: 14,
+                      top: 46,
+                      child: Container(
+                        width: 54,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: AppColors.contrast.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  if (!isCompact)
+                    Positioned(
+                      right: 24,
+                      bottom: 18,
+                      child: Icon(
+                        Icons.dashboard_customize_rounded,
+                        size: 54,
+                        color: AppColors.contrast.withValues(alpha: 0.18),
+                      ),
+                    ),
+                  Padding(
+                    padding: EdgeInsets.all(isCompact ? 14 : 16),
                     child: Row(
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 'Digital solutions, built cleanly',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                                softWrap: true,
                                 style: AppTextStyles.cardTitle.copyWith(
                                   color: AppColors.contrast,
-                                  fontSize: isCompact ? 20 : 23,
-                                  height: 1.1,
+                                  fontSize: isCompact ? 19 : 23,
+                                  height: 1.14,
                                 ),
                               ),
                               const SizedBox(height: 7),
                               Text(
                                 'Apps, dashboards, websites, and systems.',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                softWrap: true,
                                 style: AppTextStyles.caption.copyWith(
                                   color: AppColors.contrast.withValues(
                                     alpha: 0.72,
                                   ),
+                                  height: 1.35,
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              SizedBox(
-                                height: 36,
-                                child: FilledButton.icon(
-                                  onPressed: () => Navigator.of(
-                                    context,
-                                  ).pushNamed(AppRoutes.projects),
-                                  icon: const Icon(
-                                    Icons.workspaces_rounded,
-                                    size: 16,
-                                  ),
-                                  label: const Text(
-                                    'Explore Projects',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: AppColors.accentBlue,
-                                    foregroundColor: AppColors.contrast,
-                                    textStyle: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: isVeryCompact
+                                      ? double.infinity
+                                      : 190,
+                                ),
+                                child: SizedBox(
+                                  width: isVeryCompact ? double.infinity : null,
+                                  height: 38,
+                                  child: FilledButton.icon(
+                                    onPressed: () => Navigator.of(
+                                      context,
+                                    ).pushNamed(AppRoutes.projects),
+                                    icon: const Icon(
+                                      Icons.workspaces_rounded,
+                                      size: 16,
                                     ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
+                                    label: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        isVeryCompact
+                                            ? 'Projects'
+                                            : 'Explore Projects',
+                                      ),
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: AppColors.accentBlue,
+                                      foregroundColor: AppColors.contrast,
+                                      textStyle: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: isCompact ? 10 : 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -829,17 +861,18 @@ class _HeroSection extends StatelessWidget {
                         ],
                       ],
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
+// Home preview section for a small set of services.
 class _ServicesPreview extends StatelessWidget {
   const _ServicesPreview({required this.services});
 
@@ -894,6 +927,7 @@ class _ServicesPreview extends StatelessWidget {
   }
 }
 
+// Compact service preview card with inferred icon and accent color.
 class _ServiceCard extends StatelessWidget {
   const _ServiceCard({required this.service});
 
@@ -971,6 +1005,7 @@ class _ServiceCard extends StatelessWidget {
     );
   }
 
+  // Chooses a Material icon based on service keywords.
   IconData _getIconForService(String? icon, String title) {
     final value = '${icon ?? ''} $title'.toLowerCase();
     if (value.contains('web') || value.contains('website')) {
@@ -1002,6 +1037,7 @@ class _ServiceCard extends StatelessWidget {
     return Icons.auto_awesome_rounded;
   }
 
+  // Chooses an accent color based on service keywords.
   Color _getColorForService(String? icon, String title) {
     final value = '${icon ?? ''} $title'.toLowerCase();
     if (value.contains('mobile') || value.contains('app')) {
@@ -1025,6 +1061,7 @@ class _ServiceCard extends StatelessWidget {
   }
 }
 
+// Home preview section for featured projects.
 class _ProjectsPreview extends StatelessWidget {
   const _ProjectsPreview({required this.projects});
 
@@ -1068,6 +1105,7 @@ class _ProjectsPreview extends StatelessWidget {
   }
 }
 
+// Compact image-backed project card shown in the home preview.
 class _ProjectCard extends StatelessWidget {
   const _ProjectCard({required this.project});
 

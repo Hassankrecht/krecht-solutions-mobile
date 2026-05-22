@@ -1,46 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../core/api/api_client.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../providers/settings_provider.dart';
 
-class PrivacyPolicyPage extends StatefulWidget {
+// Displays local static privacy policy content.
+class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
 
   @override
-  State<PrivacyPolicyPage> createState() => _PrivacyPolicyPageState();
-}
-
-class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
-  String _content = '';
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPrivacyPolicy();
-  }
-
-  Future<void> _loadPrivacyPolicy() async {
-    try {
-      final response = await ApiClient.instance.getPrivacyPolicy();
-      setState(() {
-        _content = response['data']?['content'] ?? 
-                    response['content'] ?? 
-                    'No privacy policy content available.';
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load privacy policy: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final content = context.watch<SettingsProvider>().privacyPolicy;
+
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.darkNavy,
         title: const Text(
@@ -51,46 +24,17 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
           ),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: AppColors.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.bodyText),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadPrivacyPolicy,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    _content,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: AppColors.bodyText,
-                      height: 1.6,
-                    ),
-                  ),
-                ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Text(
+          content,
+          style: TextStyle(
+            fontSize: 15,
+            color: theme.colorScheme.onSurface,
+            height: 1.6,
+          ),
+        ),
+      ),
     );
   }
 }

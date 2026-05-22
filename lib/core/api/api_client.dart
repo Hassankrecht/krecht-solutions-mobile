@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import '../constants/app_constants.dart';
 import 'api_exception.dart';
 
+// Single API client used by providers and pages to communicate with the backend.
 class ApiClient {
   ApiClient._();
   static final ApiClient instance = ApiClient._();
@@ -13,6 +14,7 @@ class ApiClient {
 
   // ─── Internals ─────────────────────────────────────────────────────────────
 
+  // Builds common JSON headers for API requests.
   Future<Map<String, String>> _headers() async {
     return <String, String>{
       'Content-Type': 'application/json',
@@ -20,6 +22,7 @@ class ApiClient {
     };
   }
 
+  // Combines the configured base URL with an endpoint path and query values.
   Uri _uri(String path, [Map<String, dynamic>? query]) {
     final q = query?.map((k, v) => MapEntry(k, v.toString()));
     return Uri.parse(
@@ -27,6 +30,7 @@ class ApiClient {
     ).replace(queryParameters: q?.isEmpty ?? true ? null : q);
   }
 
+  // Decodes API responses and throws ApiException for non-success statuses.
   dynamic _handleResponse(http.Response res) {
     final body = jsonDecode(res.body);
     if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -42,6 +46,7 @@ class ApiClient {
     throw ApiException(statusCode: res.statusCode, message: msg, data: body);
   }
 
+  // Shared GET request wrapper with timeout and normalized error handling.
   Future<dynamic> _get(String path, {Map<String, dynamic>? query}) async {
     _isLoading = true;
     try {
@@ -60,6 +65,7 @@ class ApiClient {
     }
   }
 
+  // Shared POST request wrapper with JSON encoding and normalized errors.
   Future<dynamic> _post(String path, Map<String, dynamic> body) async {
     _isLoading = true;
     try {
@@ -99,16 +105,7 @@ class ApiClient {
 
   Future<dynamic> getContact() => _get('/contact');
 
-  Future<dynamic> getAppSettings() => _get('/settings');
-
-  Future<dynamic> getPrivacyPolicy() => _get('/pages/privacy-policy');
-
-  Future<dynamic> getTerms() => _get('/pages/terms');
-
-  Future<dynamic> getSecurity() => _get('/pages/security');
-
-  Future<dynamic> getFaqs() => _get('/faqs');
-
+  // Sends contact form data to the backend.
   Future<dynamic> submitContact({
     required String name,
     required String email,

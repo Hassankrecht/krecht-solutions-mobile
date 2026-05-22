@@ -1,3 +1,4 @@
+// Central list of route names used by Navigator throughout the app.
 abstract final class AppRoutes {
   static const String splash = '/';
   static const String shell = '/shell';

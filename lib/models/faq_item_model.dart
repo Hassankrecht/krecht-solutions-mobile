@@ -1,3 +1,4 @@
+// FAQ item data model used by settings/support FAQ screens.
 class FaqItemModel {
   const FaqItemModel({
     required this.id,
@@ -19,6 +20,7 @@ class FaqItemModel {
   final String? createdAt;
   final String? updatedAt;
 
+  // Creates a FAQ item from API JSON with safe fallback values.
   factory FaqItemModel.fromJson(Map<String, dynamic> json) {
     return FaqItemModel(
       id: (json['id'] as num?)?.toInt() ?? 0,

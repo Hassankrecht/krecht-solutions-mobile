@@ -5,6 +5,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/services_provider.dart';
 
+// Services index page that loads services and displays them in a responsive grid.
 class ServicesPage extends StatefulWidget {
   const ServicesPage({super.key});
 
@@ -96,6 +97,7 @@ class _ServicesPageState extends State<ServicesPage> {
   }
 }
 
+// Dark summary box shown below the app bar.
 class _ServicesHeader extends StatelessWidget {
   const _ServicesHeader({required this.count});
 
@@ -164,6 +166,7 @@ class _ServicesHeader extends StatelessWidget {
   }
 }
 
+// One service card with an inferred icon/color and contact navigation.
 class _ServiceCard extends StatelessWidget {
   const _ServiceCard({required this.service});
 
@@ -335,6 +338,7 @@ class _ServiceCard extends StatelessWidget {
   }
 }
 
+// Empty state shown when the services API returns no results.
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
@@ -364,6 +368,7 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+// Error state with retry action for failed service loading.
 class _ErrorState extends StatelessWidget {
   const _ErrorState({required this.message, required this.onRetry});
   final String message;

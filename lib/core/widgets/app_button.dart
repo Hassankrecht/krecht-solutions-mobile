@@ -13,6 +13,8 @@ import '../theme/app_colors.dart';
 /// All share border-radius: 50px (StadiumBorder) per the CSS.
 enum _AppButtonVariant { primary, outlined, cta, text }
 
+// Reusable button component that keeps CTA, outlined, and text buttons aligned
+// with the app design system.
 class AppButton extends StatelessWidget {
   const AppButton._({
     required _AppButtonVariant variant,

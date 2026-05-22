@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Lightweight localization helper for English and Arabic app strings.
 class AppLocalizations {
   static const LocalizationsDelegate<AppLocalizations> delegate =
       _AppLocalizationsDelegate();
@@ -12,6 +13,7 @@ class AppLocalizations {
 
   AppLocalizations(this.locale);
 
+  // Localized string table grouped by language code.
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
       // App
@@ -165,6 +167,7 @@ class AppLocalizations {
     },
   };
 
+  // Returns a localized value, falling back to English and then the key.
   String get(String key) {
     return _localizedValues[locale.languageCode]?[key] ??
         _localizedValues['en']![key] ??
@@ -246,6 +249,7 @@ class AppLocalizations {
   String get and => get('and');
 }
 
+// Connects AppLocalizations to Flutter's localization system.
 class _AppLocalizationsDelegate
     extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();

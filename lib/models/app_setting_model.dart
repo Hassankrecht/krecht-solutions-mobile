@@ -34,6 +34,7 @@ class AppSettingModel {
   final String? termsConditions;
   final String? securityText;
 
+  // Creates settings from API JSON, accepting either wrapped or direct data.
   factory AppSettingModel.fromJson(Map<String, dynamic> json) {
     final data = json['data'] ?? json;
     return AppSettingModel(
@@ -76,6 +77,7 @@ class AppSettingModel {
     'security_text': securityText,
   };
 
+  // Compatibility getter for older code that accesses settings by key.
   String? get(String key) {
     final fieldMap = {
       'contact_phone': contactPhone,

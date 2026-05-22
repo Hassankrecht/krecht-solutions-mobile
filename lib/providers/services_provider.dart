@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../core/api/api_client.dart';
 import '../core/api/api_exception.dart';
 
+// Manages service list loading and error state.
 class ServicesProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
@@ -11,6 +12,7 @@ class ServicesProvider extends ChangeNotifier {
   String? get error => _error;
   List<Map<String, dynamic>> get services => _services;
 
+  // Fetches services from the API and normalizes each item into a map.
   Future<void> fetchServices() async {
     _isLoading = true;
     _error = null;

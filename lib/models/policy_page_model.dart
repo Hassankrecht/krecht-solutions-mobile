@@ -23,6 +23,7 @@ class PolicyPageModel {
   final String? createdAt;
   final String? updatedAt;
 
+  // Creates a policy page from API JSON with safe fallback values.
   factory PolicyPageModel.fromJson(Map<String, dynamic> json) {
     return PolicyPageModel(
       id: (json['id'] as num?)?.toInt() ?? 0,

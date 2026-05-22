@@ -1,5 +1,6 @@
 import 'app_config.dart';
 
+// App-wide constant values that should remain consistent across modules.
 abstract final class AppConstants {
   static const String appName = 'Krecht Solutions';
   static const String appVersion = '1.0.0';

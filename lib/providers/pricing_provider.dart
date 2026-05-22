@@ -4,6 +4,7 @@ import '../core/api/api_exception.dart';
 import '../models/pricing_category_model.dart';
 import '../models/pricing_package_model.dart';
 
+// Manages pricing categories, packages, selected filters, loading, and errors.
 class PricingProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
@@ -19,6 +20,7 @@ class PricingProvider extends ChangeNotifier {
   PricingPackageModel? get selectedPackage => _selectedPackage;
   PricingCategoryModel? get selectedCategory => _selectedCategory;
 
+  // Applies the selected pricing category without mutating the full package list.
   List<PricingPackageModel> get packagesByCategory {
     if (_selectedCategory == null) return _packages;
     return _packages
@@ -26,10 +28,12 @@ class PricingProvider extends ChangeNotifier {
         .toList();
   }
 
+  // Loads categories and packages together for pricing screens.
   Future<void> init() async {
     await Future.wait([fetchCategories(), fetchPackages()]);
   }
 
+  // Fetches pricing categories used by package filters.
   Future<void> fetchCategories() async {
     try {
       final res = await ApiClient.instance.getPricingCategories();
@@ -50,6 +54,7 @@ class PricingProvider extends ChangeNotifier {
     }
   }
 
+  // Fetches all pricing packages.
   Future<void> fetchPackages() async {
     try {
       final res = await ApiClient.instance.getPricingPackages();
@@ -70,6 +75,7 @@ class PricingProvider extends ChangeNotifier {
     }
   }
 
+  // Fetches one package for a potential package-details flow.
   Future<void> fetchPackageDetails(String slug) async {
     _isLoading = true;
     _error = null;
@@ -90,16 +96,19 @@ class PricingProvider extends ChangeNotifier {
     }
   }
 
+  // Stores the active pricing category filter.
   void selectCategory(PricingCategoryModel? category) {
     _selectedCategory = category;
     notifyListeners();
   }
 
+  // Removes the pricing category filter.
   void clearSelectedCategory() {
     _selectedCategory = null;
     notifyListeners();
   }
 
+  // Searches packages by name or description.
   List<PricingPackageModel> searchPackages(String query) {
     if (query.isEmpty) return _packages;
     final lowerQuery = query.toLowerCase();

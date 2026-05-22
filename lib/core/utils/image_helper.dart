@@ -1,6 +1,8 @@
 import '../constants/app_constants.dart';
 
+// Converts API image/video paths into absolute URLs the UI can load.
 class ImageHelper {
+  // Uses the API base URL to derive the public host for media assets.
   static String get _assetBaseUrl {
     final apiUri = Uri.parse(AppConstants.baseUrl);
     return apiUri
@@ -10,6 +12,7 @@ class ImageHelper {
   }
 
   static String? buildImageUrl(String? path) {
+    // Empty values should stay empty so image widgets can show placeholders.
     final rawPath = path?.trim();
     if (rawPath == null || rawPath.isEmpty) {
       return null;
@@ -23,6 +26,8 @@ class ImageHelper {
     // Remove leading slash if present
     final cleanPath = rawPath.replaceFirst(RegExp(r'^/+'), '');
 
+    // Backend sometimes returns paths with storage/assets already included.
+    // Other paths are treated as files inside the public storage directory.
     final normalizedPath =
         cleanPath.startsWith('assets/') || cleanPath.startsWith('storage/')
         ? cleanPath
@@ -31,10 +36,12 @@ class ImageHelper {
   }
 
   static String? buildVideoUrl(String? path) {
+    // Videos are stored under the same public asset rules as images.
     return buildImageUrl(path);
   }
 
   static List<String?> buildImageUrls(List<String>? paths) {
+    // Converts gallery image paths while preserving an empty gallery.
     if (paths == null || paths.isEmpty) {
       return [];
     }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 
+// Build-time configuration values used by API and app-level services.
 abstract final class AppConfig {
   // Toggle between local and production API
   static const bool isLocal = true;

@@ -8,6 +8,7 @@ import '../../models/pricing_package_model.dart';
 import '../../providers/pricing_provider.dart';
 import '../../providers/language_provider.dart';
 
+// Pricing packages page with category filtering and responsive package cards.
 class PackagesPage extends StatefulWidget {
   const PackagesPage({super.key});
 
@@ -89,20 +90,22 @@ class _PackagesPageState extends State<PackagesPage> {
 
           return CustomScrollView(
             slivers: [
-              if (pricingProvider.categories.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: _CategoriesSection(
-                    categories: pricingProvider.categories,
-                    selectedCategory: pricingProvider.selectedCategory,
-                    onCategorySelected: (category) {
-                      pricingProvider.selectCategory(category);
-                    },
-                    onClearCategory: () {
-                      pricingProvider.clearSelectedCategory();
-                    },
-                    isArabic: languageProvider.isArabic,
-                  ),
+              SliverToBoxAdapter(
+                child: _PricingHeader(
+                  packageCount: pricingProvider.selectedCategory == null
+                      ? pricingProvider.packages.length
+                      : pricingProvider.packagesByCategory.length,
+                  categories: pricingProvider.categories,
+                  selectedCategory: pricingProvider.selectedCategory,
+                  onCategorySelected: (category) {
+                    pricingProvider.selectCategory(category);
+                  },
+                  onClearCategory: () {
+                    pricingProvider.clearSelectedCategory();
+                  },
+                  isArabic: languageProvider.isArabic,
                 ),
+              ),
               if (pricingProvider.packages.isNotEmpty)
                 _PackagesSection(
                   packages: pricingProvider.selectedCategory == null
@@ -118,8 +121,10 @@ class _PackagesPageState extends State<PackagesPage> {
   }
 }
 
-class _CategoriesSection extends StatelessWidget {
-  const _CategoriesSection({
+// Dark summary box below the app bar with package count and filters.
+class _PricingHeader extends StatelessWidget {
+  const _PricingHeader({
+    required this.packageCount,
     required this.categories,
     required this.selectedCategory,
     required this.onCategorySelected,
@@ -127,6 +132,7 @@ class _CategoriesSection extends StatelessWidget {
     required this.isArabic,
   });
 
+  final int packageCount;
   final List<PricingCategoryModel> categories;
   final PricingCategoryModel? selectedCategory;
   final Function(PricingCategoryModel) onCategorySelected;
@@ -136,41 +142,99 @@ class _CategoriesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Categories', style: AppTextStyles.sectionTitle),
-          const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.darkNavy,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.contrast.withValues(alpha: 0.08)),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Column(
+          children: [
+            Row(
               children: [
-                if (selectedCategory != null)
-                  _CategoryChip(
-                    label: 'All',
-                    isSelected: selectedCategory == null,
-                    onTap: onClearCategory,
-                  ),
-                ...categories.map(
-                  (category) => Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: _CategoryChip(
-                      label: category.getLocalizedName(isArabic),
-                      isSelected: selectedCategory?.id == category.id,
-                      onTap: () => onCategorySelected(category),
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: AppColors.accentBlue.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.contrast.withValues(alpha: 0.10),
                     ),
+                  ),
+                  child: const Icon(
+                    Icons.inventory_2_rounded,
+                    color: AppColors.accentBlue,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Pricing Packages',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.sectionTitle.copyWith(
+                          color: AppColors.contrast,
+                          fontSize: 24,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        '$packageCount package${packageCount == 1 ? '' : 's'} available',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.contrast.withValues(alpha: 0.72),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            if (categories.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _CategoryChip(
+                        label: 'All',
+                        isSelected: selectedCategory == null,
+                        onTap: onClearCategory,
+                      ),
+                    ),
+                    ...categories.map(
+                      (category) => Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: _CategoryChip(
+                          label: category.getLocalizedName(isArabic),
+                          isSelected: selectedCategory?.id == category.id,
+                          onTap: () => onCategorySelected(category),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
 }
 
+// Selectable pricing category chip.
 class _CategoryChip extends StatelessWidget {
   const _CategoryChip({
     required this.label,
@@ -208,6 +272,7 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
+// Responsive grid section for pricing package cards.
 class _PackagesSection extends StatelessWidget {
   const _PackagesSection({required this.packages, required this.isArabic});
 
@@ -244,6 +309,7 @@ class _PackagesSection extends StatelessWidget {
   }
 }
 
+// One pricing package card including featured state, description, and CTA.
 class _PackageCard extends StatelessWidget {
   const _PackageCard({required this.package, required this.isArabic});
 

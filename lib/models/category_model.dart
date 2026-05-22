@@ -1,3 +1,4 @@
+// Category data shared by projects and other categorized content.
 class CategoryModel {
   const CategoryModel({
     required this.id,
@@ -34,6 +35,7 @@ class CategoryModel {
   final String? descriptionEn;
   final String? descriptionAr;
 
+  // Creates a category from API JSON with safe fallback values.
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
@@ -71,12 +73,14 @@ class CategoryModel {
     'description_ar': descriptionAr,
   };
 
+  // Returns Arabic name when active and available, otherwise English/default.
   String getLocalizedName(bool isArabic) {
     return isArabic && nameAr != null && nameAr!.isNotEmpty
         ? nameAr!
         : (nameEn ?? name);
   }
 
+  // Returns Arabic description when active and available, otherwise English/default.
   String getLocalizedDescription(bool isArabic) {
     return isArabic && descriptionAr != null && descriptionAr!.isNotEmpty
         ? descriptionAr!

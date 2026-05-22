@@ -35,8 +35,10 @@ class PaginatedResponseModel<T> {
   final String? nextPageUrl;
   final String? prevPageUrl;
 
+  // True when another page can be requested from the backend.
   bool get hasNextPage => currentPage < lastPage;
 
+  // Parses paginated JSON and delegates item parsing to the caller.
   factory PaginatedResponseModel.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromItem,

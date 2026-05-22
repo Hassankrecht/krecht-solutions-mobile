@@ -1,3 +1,4 @@
+// Normalized exception type for API and network failures.
 class ApiException implements Exception {
   final int? statusCode;
   final String message;
@@ -5,6 +6,7 @@ class ApiException implements Exception {
 
   ApiException({this.statusCode, required this.message, this.data});
 
+  // Convenience flags used by UI/provider code when handling common failures.
   bool get isUnauthorized => statusCode == 401;
   bool get isForbidden => statusCode == 403;
   bool get isNotFound => statusCode == 404;

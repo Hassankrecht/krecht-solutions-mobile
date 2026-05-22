@@ -51,6 +51,7 @@ abstract final class AppTheme {
   ];
 
   // ── Light theme ───────────────────────────────────────────────────────────
+  // Complete Material theme used for normal app rendering.
   static ThemeData get light {
     const colorScheme = ColorScheme(
       brightness: Brightness.light,
@@ -300,6 +301,7 @@ abstract final class AppTheme {
   }
 
   // ── Dark theme ────────────────────────────────────────────────────────────
+  // Dark Material theme used when the system/app enables dark mode.
   static ThemeData get dark {
     const colorScheme = ColorScheme(
       brightness: Brightness.dark,

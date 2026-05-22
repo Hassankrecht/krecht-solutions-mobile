@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Supported app languages.
 enum AppLanguage { english, arabic }
 
+// Persists and exposes the current language, locale, and text direction.
 class LanguageProvider extends ChangeNotifier {
   static const String _languageKey = 'app_language';
   
@@ -24,6 +26,7 @@ class LanguageProvider extends ChangeNotifier {
     _loadLanguage();
   }
 
+  // Restores the saved language from local preferences.
   Future<void> _loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
     final languageCode = prefs.getString(_languageKey);
@@ -36,6 +39,7 @@ class LanguageProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Saves and applies a new app language.
   Future<void> setLanguage(AppLanguage language) async {
     _currentLanguage = language;
     final prefs = await SharedPreferences.getInstance();
@@ -43,6 +47,7 @@ class LanguageProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Returns Arabic content when active and available, otherwise English.
   String getLocalizedContent({
     required String? english,
     required String? arabic,

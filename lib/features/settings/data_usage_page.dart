@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 
+// Static privacy/data explanation page shown from Settings.
 class DataUsagePage extends StatelessWidget {
   const DataUsagePage({super.key});
 
@@ -68,6 +69,7 @@ class DataUsagePage extends StatelessWidget {
   }
 }
 
+// Reusable policy section card for title and body content.
 class _SectionCard extends StatelessWidget {
   const _SectionCard({
     required this.title,

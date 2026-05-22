@@ -1,48 +1,20 @@
 import 'package:flutter/material.dart';
-import '../../core/api/api_client.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/faq_item_model.dart';
+import '../../providers/settings_provider.dart';
 
-class FaqPage extends StatefulWidget {
+// FAQ screen that displays local static question/answer items.
+class FaqPage extends StatelessWidget {
   const FaqPage({super.key});
 
   @override
-  State<FaqPage> createState() => _FaqPageState();
-}
-
-class _FaqPageState extends State<FaqPage> {
-  List<Map<String, dynamic>> _faqs = [];
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadFaqs();
-  }
-
-  Future<void> _loadFaqs() async {
-    try {
-      final response = await ApiClient.instance.getFaqs();
-      setState(() {
-        _faqs = List<Map<String, dynamic>>.from(
-          response['data'] is List 
-              ? response['data'] 
-              : [],
-        );
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load FAQs: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final faqs = context.watch<SettingsProvider>().faqs;
+
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.darkNavy,
         title: const Text(
@@ -53,66 +25,31 @@ class _FaqPageState extends State<FaqPage> {
           ),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: AppColors.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.bodyText),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadFaqs,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : _faqs.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No FAQs available at the moment.',
-                        style: TextStyle(color: AppColors.bodyTextMuted),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(20),
-                      itemCount: _faqs.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final faq = _faqs[index];
-                        return _FaqCard(
-                          question: faq['question'] ?? 'No question',
-                          answer: faq['answer'] ?? 'No answer available',
-                        );
-                      },
-                    ),
+      body: faqs.isEmpty
+          ? const Center(
+              child: Text(
+                'No FAQs available at the moment.',
+                style: TextStyle(color: AppColors.bodyTextMuted),
+              ),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(20),
+              itemCount: faqs.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final faq = faqs[index];
+                return _FaqCard(faq: faq);
+              },
+            ),
     );
   }
 }
 
+// Expandable card for one FAQ question and answer.
 class _FaqCard extends StatefulWidget {
-  const _FaqCard({
-    required this.question,
-    required this.answer,
-  });
+  const _FaqCard({required this.faq});
 
-  final String question;
-  final String answer;
+  final FaqItemModel faq;
 
   @override
   State<_FaqCard> createState() => _FaqCardState();
@@ -123,9 +60,11 @@ class _FaqCardState extends State<_FaqCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(
@@ -144,11 +83,11 @@ class _FaqCardState extends State<_FaqCard> {
           });
         },
         title: Text(
-          widget.question,
-          style: const TextStyle(
+          widget.faq.question,
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: AppColors.darkNavy,
+            color: colorScheme.primary,
           ),
         ),
         trailing: Icon(
@@ -157,10 +96,10 @@ class _FaqCardState extends State<_FaqCard> {
         ),
         children: [
           Text(
-            widget.answer,
-            style: const TextStyle(
+            widget.faq.answer,
+            style: TextStyle(
               fontSize: 14,
-              color: AppColors.bodyText,
+              color: colorScheme.onSurface,
               height: 1.5,
             ),
           ),

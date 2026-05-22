@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 
+// Static company information screen.
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
 
@@ -27,6 +28,7 @@ class _AboutPageState extends State<AboutPage> {
     );
   }
 
+  // Builds the page content as reusable title/body sections.
   Widget _buildContent() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -56,6 +58,7 @@ class _AboutPageState extends State<AboutPage> {
   }
 }
 
+// Reusable about-page block with a heading and bordered text surface.
 class _Section extends StatelessWidget {
   const _Section({required this.title, required this.content});
 

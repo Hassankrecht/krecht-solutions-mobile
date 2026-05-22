@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'category_model.dart';
 
+// Project data model used by project lists, details, and home previews.
 class ProjectModel {
   const ProjectModel({
     required this.id,
@@ -70,6 +71,7 @@ class ProjectModel {
   final String? contentEn;
   final String? contentAr;
 
+  // Creates a project from API JSON while accepting several media/category keys.
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     return ProjectModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
@@ -173,12 +175,14 @@ class ProjectModel {
     'content_ar': contentAr,
   };
 
+  // Returns Arabic title when active and available, otherwise English/default.
   String getLocalizedTitle(bool isArabic) {
     return isArabic && titleAr != null && titleAr!.isNotEmpty
         ? titleAr!
         : (titleEn ?? title);
   }
 
+  // Returns Arabic short description when active and available.
   String getLocalizedShortDescription(bool isArabic) {
     return isArabic &&
             shortDescriptionAr != null &&
@@ -187,18 +191,21 @@ class ProjectModel {
         : (shortDescriptionEn ?? shortDescription ?? '');
   }
 
+  // Returns Arabic description when active and available.
   String getLocalizedDescription(bool isArabic) {
     return isArabic && descriptionAr != null && descriptionAr!.isNotEmpty
         ? descriptionAr!
         : (descriptionEn ?? description ?? '');
   }
 
+  // Returns localized long content, falling back to description.
   String getLocalizedContent(bool isArabic) {
     return isArabic && contentAr != null && contentAr!.isNotEmpty
         ? contentAr!
         : (contentEn ?? description ?? '');
   }
 
+  // Returns localized technology labels for display.
   List<String> getLocalizedTechnologies(bool isArabic) {
     if (isArabic && technologiesAr != null && technologiesAr!.isNotEmpty) {
       return technologiesAr!;
@@ -206,6 +213,7 @@ class ProjectModel {
     return technologiesEn ?? [];
   }
 
+  // Parses bool values that may arrive as bool, number, or string.
   static bool _boolValue(dynamic value, {required bool fallback}) {
     if (value is bool) return value;
     if (value is num) return value != 0;
@@ -217,6 +225,7 @@ class ProjectModel {
     return fallback;
   }
 
+  // Normalizes list-like API values into a list of non-empty strings.
   static List<String>? _stringList(dynamic value) {
     if (value == null) return null;
     if (value is List) {
@@ -250,6 +259,7 @@ class ProjectModel {
     return null;
   }
 
+  // Finds the first non-empty string among possible API field names.
   static String? _firstString(Map<dynamic, dynamic> json, List<String> keys) {
     for (final key in keys) {
       final value = json[key];

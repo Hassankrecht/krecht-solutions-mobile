@@ -13,6 +13,7 @@ import '../../models/project_model.dart';
 import '../../providers/language_provider.dart';
 import '../../providers/projects_provider.dart';
 
+// Project details page with gallery, summary metadata, video, and description.
 class ProjectDetailsPage extends StatefulWidget {
   const ProjectDetailsPage({super.key, required this.projectId});
 
@@ -34,12 +35,14 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
     });
   }
 
+  // Opens external project/video links outside the app.
   Future<void> _launchUrl(String url) async {
     final uri = Uri.tryParse(url);
     if (uri == null) return;
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
+  // Resets the selected gallery image when the loaded project changes.
   void _syncSelectedImage(ProjectModel project, List<String> images) {
     if (_selectedProjectId == project.id) return;
     _selectedProjectId = project.id;
@@ -139,6 +142,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
     );
   }
 
+  // Builds a unique, non-empty image list from main image plus gallery images.
   List<String> _projectImages(ProjectModel project) {
     final images = <String>[
       if (project.image != null && project.image!.trim().isNotEmpty)
@@ -149,6 +153,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   }
 }
 
+// Large main project image at the top of the details page.
 class _HeroImage extends StatelessWidget {
   const _HeroImage({required this.imagePath, required this.version});
 
@@ -188,6 +193,7 @@ class _HeroImage extends StatelessWidget {
     );
   }
 
+  // Adds an update timestamp query value so changed images refresh in cache.
   String? _withVersion(String? url, String? version) {
     if (url == null || url.isEmpty || version == null || version.isEmpty) {
       return url;
@@ -197,6 +203,7 @@ class _HeroImage extends StatelessWidget {
   }
 }
 
+// Project title, category, short description, metadata, and external CTA.
 class _ProjectSummary extends StatelessWidget {
   const _ProjectSummary({
     required this.project,
@@ -277,6 +284,7 @@ class _ProjectSummary extends StatelessWidget {
     );
   }
 
+  // Resolves the visible category name from available project/category data.
   String _categoryName(
     ProjectModel project,
     List<CategoryModel> allCategories,
@@ -301,6 +309,7 @@ class _ProjectSummary extends StatelessWidget {
   }
 }
 
+// Horizontal gallery strip for selecting the main project image.
 class _GalleryStrip extends StatelessWidget {
   const _GalleryStrip({
     required this.images,
@@ -370,6 +379,7 @@ class _GalleryStrip extends StatelessWidget {
     );
   }
 
+  // Cache-busting helper used for gallery thumbnails.
   String? _withVersion(String? url, String? version) {
     if (url == null || url.isEmpty || version == null || version.isEmpty) {
       return url;
@@ -379,6 +389,7 @@ class _GalleryStrip extends StatelessWidget {
   }
 }
 
+// Video preview card that opens the project video externally.
 class _VideoCard extends StatelessWidget {
   const _VideoCard({
     required this.videoUrl,
@@ -471,6 +482,7 @@ class _VideoCard extends StatelessWidget {
     );
   }
 
+  // Extracts a YouTube video id and returns a thumbnail URL when possible.
   String? _youtubeThumbnail(String url) {
     final uri = Uri.tryParse(url);
     if (uri == null) return null;
@@ -492,6 +504,7 @@ class _VideoCard extends StatelessWidget {
   }
 }
 
+// Reusable white content card for detail sections.
 class _SectionCard extends StatelessWidget {
   const _SectionCard({required this.child, this.title, this.padding});
 
@@ -524,6 +537,7 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
+// Compact metadata pill used for project client/status fields.
 class _MetaPill extends StatelessWidget {
   const _MetaPill({
     required this.icon,
@@ -568,6 +582,7 @@ class _MetaPill extends StatelessWidget {
   }
 }
 
+// Small category label displayed in the project summary.
 class _CategoryBadge extends StatelessWidget {
   const _CategoryBadge({required this.label});
 
@@ -593,6 +608,7 @@ class _CategoryBadge extends StatelessWidget {
   }
 }
 
+// Loading placeholder for project images.
 class _LoadingImage extends StatelessWidget {
   const _LoadingImage({required this.height});
 
@@ -614,6 +630,7 @@ class _LoadingImage extends StatelessWidget {
   }
 }
 
+// Placeholder shown when a project image is missing or fails to load.
 class _ImagePlaceholder extends StatelessWidget {
   const _ImagePlaceholder({required this.height});
 
@@ -634,6 +651,7 @@ class _ImagePlaceholder extends StatelessWidget {
   }
 }
 
+// Placeholder shown when no video thumbnail can be resolved.
 class _VideoPlaceholder extends StatelessWidget {
   const _VideoPlaceholder();
 
@@ -652,6 +670,7 @@ class _VideoPlaceholder extends StatelessWidget {
   }
 }
 
+// Empty state shown when a project id does not resolve to data.
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
@@ -681,6 +700,7 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+// Error state with retry action for failed detail loading.
 class _ErrorState extends StatelessWidget {
   const _ErrorState({required this.message, required this.onRetry});
 

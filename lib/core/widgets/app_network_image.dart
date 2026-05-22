@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+// Shared network image widget with platform-specific loading behavior.
 class AppNetworkImage extends StatelessWidget {
   const AppNetworkImage({
     super.key,
@@ -22,6 +23,8 @@ class AppNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // On web, prefer the browser HTML image element for better compatibility
+    // with remote images and CORS-sensitive rendering.
     if (kIsWeb) {
       return Image.network(
         key: ValueKey(imageUrl),
@@ -42,6 +45,7 @@ class AppNetworkImage extends StatelessWidget {
       );
     }
 
+    // On mobile/desktop, use cached_network_image to reuse downloaded images.
     return CachedNetworkImage(
       key: ValueKey(imageUrl),
       imageUrl: imageUrl,

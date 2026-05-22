@@ -1,3 +1,4 @@
+// Service data model with bilingual content fields.
 class ServiceItemModel {
   const ServiceItemModel({
     required this.id,
@@ -44,6 +45,7 @@ class ServiceItemModel {
   final String? contentEn;
   final String? contentAr;
 
+  // Creates a service from API JSON with safe fallback values.
   factory ServiceItemModel.fromJson(Map<String, dynamic> json) {
     return ServiceItemModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
@@ -91,12 +93,14 @@ class ServiceItemModel {
     'content_ar': contentAr,
   };
 
+  // Returns Arabic title when active and available, otherwise English/default.
   String getLocalizedTitle(bool isArabic) {
     return isArabic && titleAr != null && titleAr!.isNotEmpty
         ? titleAr!
         : (titleEn ?? title);
   }
 
+  // Returns Arabic short description when active and available.
   String getLocalizedShortDescription(bool isArabic) {
     return isArabic &&
             shortDescriptionAr != null &&
@@ -105,12 +109,14 @@ class ServiceItemModel {
         : (shortDescriptionEn ?? shortDescription ?? '');
   }
 
+  // Returns Arabic description when active and available.
   String getLocalizedDescription(bool isArabic) {
     return isArabic && descriptionAr != null && descriptionAr!.isNotEmpty
         ? descriptionAr!
         : (descriptionEn ?? description ?? '');
   }
 
+  // Returns localized long content, falling back to description.
   String getLocalizedContent(bool isArabic) {
     return isArabic && contentAr != null && contentAr!.isNotEmpty
         ? contentAr!

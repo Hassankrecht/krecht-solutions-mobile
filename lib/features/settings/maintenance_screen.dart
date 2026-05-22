@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 
+// Full-screen maintenance message shown when the backend disables the app.
 class MaintenanceScreen extends StatelessWidget {
   const MaintenanceScreen({super.key});
 

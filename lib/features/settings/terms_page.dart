@@ -1,46 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../core/api/api_client.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../providers/settings_provider.dart';
 
-class TermsPage extends StatefulWidget {
+// Displays local static terms content.
+class TermsPage extends StatelessWidget {
   const TermsPage({super.key});
 
   @override
-  State<TermsPage> createState() => _TermsPageState();
-}
-
-class _TermsPageState extends State<TermsPage> {
-  String _content = '';
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTerms();
-  }
-
-  Future<void> _loadTerms() async {
-    try {
-      final response = await ApiClient.instance.getTerms();
-      setState(() {
-        _content = response['data']?['content'] ?? 
-                    response['content'] ?? 
-                    'No terms and conditions content available.';
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load terms: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final content = context.watch<SettingsProvider>().terms;
+
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.darkNavy,
         title: const Text(
@@ -51,46 +24,17 @@ class _TermsPageState extends State<TermsPage> {
           ),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: AppColors.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.bodyText),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadTerms,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    _content,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: AppColors.bodyText,
-                      height: 1.6,
-                    ),
-                  ),
-                ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Text(
+          content,
+          style: TextStyle(
+            fontSize: 15,
+            color: theme.colorScheme.onSurface,
+            height: 1.6,
+          ),
+        ),
+      ),
     );
   }
 }
