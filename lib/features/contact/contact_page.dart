@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/settings_provider.dart';
 
@@ -56,7 +57,12 @@ class _ContactPageState extends State<ContactPage> {
       if (mounted) setState(() => _error = e.message);
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'Something went wrong. Please try again.');
+        final l10n = AppLocalizations.of(context);
+        setState(
+          () => _error =
+              l10n?.get('somethingWentWrong') ??
+              'Something went wrong. Please try again.',
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -65,13 +71,15 @@ class _ContactPageState extends State<ContactPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
         backgroundColor: AppColors.darkNavy,
-        title: const Text(
-          'Contact Us',
-          style: TextStyle(
+        title: Text(
+          l10n?.get('contactUs') ?? 'Contact Us',
+          style: const TextStyle(
             color: AppColors.contrast,
             fontWeight: FontWeight.bold,
           ),
@@ -93,6 +101,7 @@ class _ContactPageState extends State<ContactPage> {
 
   // Shows local company contact actions.
   Widget _buildContactInfo() {
+    final l10n = AppLocalizations.of(context);
     final settings = context.watch<SettingsProvider>().appSettings;
     final phone = settings?.contactPhone ?? '';
     final email = settings?.contactEmail ?? '';
@@ -112,9 +121,9 @@ class _ContactPageState extends State<ContactPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Contact Information',
-            style: TextStyle(
+          Text(
+            l10n?.get('contactInformation') ?? 'Contact Information',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.darkNavy,
@@ -124,21 +133,22 @@ class _ContactPageState extends State<ContactPage> {
           if (phone.isNotEmpty)
             _ContactTile(
               icon: Icons.call_outlined,
-              label: 'Call',
+              label: AppLocalizations.of(context)?.get('call') ?? 'Call',
               value: phone,
               onTap: () => _launchUrl('tel:$phone'),
             ),
           if (whatsapp.isNotEmpty)
             _ContactTile(
               icon: Icons.chat_outlined,
-              label: 'WhatsApp',
+              label:
+                  AppLocalizations.of(context)?.get('whatsApp') ?? 'WhatsApp',
               value: whatsapp,
               onTap: () => _launchUrl('https://wa.me/${_digitsOnly(whatsapp)}'),
             ),
           if (email.isNotEmpty)
             _ContactTile(
               icon: Icons.email_outlined,
-              label: 'Email',
+              label: AppLocalizations.of(context)?.get('email') ?? 'Email',
               value: email,
               onTap: () => _launchUrl('mailto:$email'),
             ),
@@ -159,6 +169,8 @@ class _ContactPageState extends State<ContactPage> {
   }
 
   Widget _buildForm() {
+    final l10n = AppLocalizations.of(context);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Form(
@@ -166,18 +178,22 @@ class _ContactPageState extends State<ContactPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Get in Touch',
-              style: TextStyle(
+            Text(
+              l10n?.get('getInTouch') ?? 'Get in Touch',
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: AppColors.darkNavy,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'We\'ll get back to you as soon as possible.',
-              style: TextStyle(fontSize: 14, color: AppColors.bodyTextMuted),
+            Text(
+              l10n?.get('contactFormSubtitle') ??
+                  'We\'ll get back to you as soon as possible.',
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.bodyTextMuted,
+              ),
             ),
             const SizedBox(height: 24),
             if (_error != null) ...[
@@ -197,26 +213,31 @@ class _ContactPageState extends State<ContactPage> {
             ],
             _Field(
               controller: _nameController,
-              label: 'Full Name',
+              label: l10n?.get('fullName') ?? 'Full Name',
               icon: Icons.person_outline,
               action: TextInputAction.next,
               validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Name is required' : null,
+                  v == null || v.trim().isEmpty
+                      ? (l10n?.get('nameRequired') ?? 'Name is required')
+                      : null,
             ),
             const SizedBox(height: 14),
             _Field(
               controller: _emailController,
-              label: 'Email Address',
+              label: l10n?.get('emailAddress') ?? 'Email Address',
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
               action: TextInputAction.next,
               validator: (v) =>
-                  v == null || !v.contains('@') ? 'Enter a valid email' : null,
+                  v == null || !v.contains('@')
+                      ? (l10n?.get('validEmailRequired') ??
+                            'Enter a valid email')
+                      : null,
             ),
             const SizedBox(height: 14),
             _Field(
               controller: _phoneController,
-              label: 'Phone (optional)',
+              label: l10n?.get('phoneOptional') ?? 'Phone (optional)',
               icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
               action: TextInputAction.next,
@@ -224,7 +245,7 @@ class _ContactPageState extends State<ContactPage> {
             const SizedBox(height: 14),
             _Field(
               controller: _subjectController,
-              label: 'Subject (optional)',
+              label: l10n?.get('subjectOptional') ?? 'Subject (optional)',
               icon: Icons.subject_rounded,
               action: TextInputAction.next,
             ),
@@ -234,7 +255,7 @@ class _ContactPageState extends State<ContactPage> {
               maxLines: 5,
               textInputAction: TextInputAction.newline,
               decoration: InputDecoration(
-                labelText: 'Message',
+                labelText: l10n?.message ?? 'Message',
                 alignLabelWithHint: true,
                 prefixIcon: const Padding(
                   padding: EdgeInsets.only(bottom: 64),
@@ -248,7 +269,8 @@ class _ContactPageState extends State<ContactPage> {
                 ),
               ),
               validator: (v) => v == null || v.trim().length < 10
-                  ? 'Message must be at least 10 characters'
+                  ? (l10n?.get('messageMinLength') ??
+                        'Message must be at least 10 characters')
                   : null,
             ),
             const SizedBox(height: 24),
@@ -271,9 +293,9 @@ class _ContactPageState extends State<ContactPage> {
                         color: AppColors.contrast,
                       ),
                     )
-                  : const Text(
-                      'Send Message',
-                      style: TextStyle(
+                  : Text(
+                      l10n?.sendMessage ?? 'Send Message',
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
@@ -331,6 +353,8 @@ class _SuccessState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -351,19 +375,20 @@ class _SuccessState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Message Sent!',
-              style: TextStyle(
+            Text(
+              l10n?.get('messageSent') ?? 'Message Sent!',
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: AppColors.darkNavy,
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Your message has been sent successfully. We\'ll get back to you as soon as possible.',
+            Text(
+              l10n?.get('messageSentBody') ??
+                  'Your message has been sent successfully. We\'ll get back to you as soon as possible.',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 color: AppColors.bodyTextMuted,
                 height: 1.5,

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 import '../../providers/services_provider.dart';
 
 // Services index page that loads services and displays them in a responsive grid.
@@ -24,13 +26,15 @@ class _ServicesPageState extends State<ServicesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
         backgroundColor: AppColors.darkNavy,
-        title: const Text(
-          'Services',
-          style: TextStyle(
+        title: Text(
+          l10n?.services ?? 'Services',
+          style: const TextStyle(
             color: AppColors.contrast,
             fontWeight: FontWeight.bold,
           ),
@@ -105,6 +109,8 @@ class _ServicesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
       child: Container(
@@ -139,7 +145,8 @@ class _ServicesHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Professional Services',
+                    l10n?.get('professionalServices') ??
+                        'Professional Services',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.sectionTitle.copyWith(
@@ -149,7 +156,9 @@ class _ServicesHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    '$count solutions ready for your business',
+                    (l10n?.get('solutionsReady') ??
+                            '{count} solutions ready for your business')
+                        .replaceFirst('{count}', '$count'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.bodySmall.copyWith(
@@ -174,15 +183,30 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title =
-        service['title'] as String? ?? service['name'] as String? ?? '';
-    final description =
-        service['short_description'] as String? ??
-        service['description'] as String? ??
-        '';
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    final title = _localizedValue(
+      isArabic: isArabic,
+      fallback: service['title'] as String? ?? service['name'] as String? ?? '',
+      english: service['title_en'] as String? ?? service['name_en'] as String?,
+      arabic: service['title_ar'] as String? ?? service['name_ar'] as String?,
+    );
+    final description = _localizedValue(
+      isArabic: isArabic,
+      fallback:
+          service['short_description'] as String? ??
+          service['description'] as String? ??
+          '',
+      english:
+          service['short_description_en'] as String? ??
+          service['description_en'] as String?,
+      arabic:
+          service['short_description_ar'] as String? ??
+          service['description_ar'] as String?,
+    );
     final icon = service['icon'] as String? ?? '';
     final serviceIcon = _getIconForService(icon, title);
     final accent = _getColorForService(icon, title);
+    final l10n = AppLocalizations.of(context);
 
     return Material(
       color: AppColors.surface,
@@ -266,7 +290,8 @@ class _ServiceCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Discuss this service',
+                      l10n?.get('discussThisService') ??
+                          'Discuss this service',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.caption.copyWith(
@@ -282,6 +307,16 @@ class _ServiceCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _localizedValue({
+    required bool isArabic,
+    required String fallback,
+    String? english,
+    String? arabic,
+  }) {
+    if (isArabic && arabic != null && arabic.isNotEmpty) return arabic;
+    return english != null && english.isNotEmpty ? english : fallback;
   }
 
   IconData _getIconForService(String? icon, String title) {
@@ -344,19 +379,21 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final l10n = AppLocalizations.of(context);
+
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.miscellaneous_services_rounded,
             size: 64,
             color: AppColors.accentBlue,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'No services available',
-            style: TextStyle(
+            l10n?.noServices ?? 'No services available',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppColors.darkNavy,
@@ -404,7 +441,7 @@ class _ErrorState extends StatelessWidget {
               ),
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
             ),
           ],
         ),

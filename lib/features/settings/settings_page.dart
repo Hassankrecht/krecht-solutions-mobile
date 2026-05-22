@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/app_provider.dart';
 import '../../providers/language_provider.dart';
@@ -36,8 +37,13 @@ class _SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cache cleared successfully')),
+        SnackBar(
+          content: Text(
+            l10n?.get('cacheCleared') ?? 'Cache cleared successfully',
+          ),
+        ),
       );
     }
   }
@@ -87,15 +93,16 @@ class _SettingsPageState extends State<SettingsPage> {
     final appProvider = context.watch<AppProvider>();
     final settingsProvider = context.watch<SettingsProvider>();
     final languageProvider = context.watch<LanguageProvider>();
+    final l10n = AppLocalizations.of(context);
     final appSettings = settingsProvider.appSettings;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.darkNavy,
-        title: const Text(
-          'More',
-          style: TextStyle(
+        title: Text(
+          l10n?.get('more') ?? 'More',
+          style: const TextStyle(
             color: AppColors.contrast,
             fontWeight: FontWeight.bold,
           ),
@@ -105,13 +112,15 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: const EdgeInsets.all(20),
         children: [
           _SettingsGroup(
-            title: 'App Configuration',
+            title: l10n?.get('appConfiguration') ?? 'App Configuration',
             items: [
               _SettingsTile(
                 icon: Icons.language_rounded,
-                label: 'Language',
+                label: l10n?.language ?? 'Language',
                 trailing: Text(
-                  languageProvider.isArabic ? 'Arabic' : 'English',
+                  languageProvider.isArabic
+                      ? (l10n?.arabic ?? 'Arabic')
+                      : (l10n?.english ?? 'English'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -123,9 +132,9 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               _SettingsTile(
                 icon: Icons.brightness_auto_outlined,
-                label: 'Theme',
+                label: l10n?.get('theme') ?? 'Theme',
                 trailing: Text(
-                  appProvider.themeLabel,
+                  _localizedThemeLabel(appProvider, l10n),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -137,39 +146,39 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               _SettingsTile(
                 icon: Icons.cleaning_services_rounded,
-                label: 'Clear Cache',
+                label: l10n?.get('clearCache') ?? 'Clear Cache',
                 onTap: _clearCache,
               ),
             ],
           ),
           const SizedBox(height: 24),
           _SettingsGroup(
-            title: 'Privacy & Security',
+            title: l10n?.get('privacySecurity') ?? 'Privacy & Security',
             items: [
               _SettingsTile(
                 icon: Icons.privacy_tip_outlined,
-                label: 'Privacy Policy',
+                label: l10n?.privacyPolicy ?? 'Privacy Policy',
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.privacyPolicy);
                 },
               ),
               _SettingsTile(
                 icon: Icons.gavel_outlined,
-                label: 'Terms & Conditions',
+                label: l10n?.get('termsConditions') ?? 'Terms & Conditions',
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.terms);
                 },
               ),
               _SettingsTile(
                 icon: Icons.security_outlined,
-                label: 'Security',
+                label: l10n?.security ?? 'Security',
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.security);
                 },
               ),
               _SettingsTile(
                 icon: Icons.data_usage_rounded,
-                label: 'Data Usage',
+                label: l10n?.dataUsage ?? 'Data Usage',
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.dataUsage);
                 },
@@ -178,11 +187,11 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const SizedBox(height: 24),
           _SettingsGroup(
-            title: 'Support',
+            title: l10n?.get('support') ?? 'Support',
             items: [
               _SettingsTile(
                 icon: Icons.contact_support_outlined,
-                label: 'Contact Support',
+                label: l10n?.get('contactSupport') ?? 'Contact Support',
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.contact);
                 },
@@ -191,33 +200,33 @@ class _SettingsPageState extends State<SettingsPage> {
                   appSettings!.whatsappNumber.isNotEmpty)
                 _SettingsTile(
                   icon: Icons.chat_outlined,
-                  label: 'WhatsApp',
+                  label: l10n?.get('whatsApp') ?? 'WhatsApp',
                   onTap: () => _launchWhatsApp(appSettings.whatsappNumber),
                 ),
               if (appSettings?.contactPhone != null &&
                   appSettings!.contactPhone.isNotEmpty)
                 _SettingsTile(
                   icon: Icons.call_outlined,
-                  label: 'Call',
+                  label: l10n?.get('call') ?? 'Call',
                   onTap: () => _launchPhone(appSettings.contactPhone),
                 ),
               if (appSettings?.contactEmail != null &&
                   appSettings!.contactEmail.isNotEmpty)
                 _SettingsTile(
                   icon: Icons.email_outlined,
-                  label: 'Email',
+                  label: l10n?.get('email') ?? 'Email',
                   onTap: () => _launchEmail(appSettings.contactEmail),
                 ),
               _SettingsTile(
                 icon: Icons.bug_report_outlined,
-                label: 'Report Problem',
+                label: l10n?.get('reportProblem') ?? 'Report Problem',
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.contact);
                 },
               ),
               _SettingsTile(
                 icon: Icons.help_outline_rounded,
-                label: 'FAQ',
+                label: l10n?.faq ?? 'FAQ',
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.faq);
                 },
@@ -226,7 +235,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const SizedBox(height: 24),
           _SettingsGroup(
-            title: 'Social',
+            title: l10n?.get('social') ?? 'Social',
             items: [
               if (appSettings?.facebookUrl != null &&
                   appSettings!.facebookUrl!.isNotEmpty)
@@ -253,18 +262,19 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const SizedBox(height: 24),
           _SettingsGroup(
-            title: 'About',
+            title: l10n?.about ?? 'About',
             items: [
               _SettingsTile(
                 icon: Icons.business_outlined,
-                label: 'About Krecht Solutions',
+                label: l10n?.get('aboutKrechtSolutions') ??
+                    'About Krecht Solutions',
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.about);
                 },
               ),
               _SettingsTile(
                 icon: Icons.info_outline_rounded,
-                label: 'App Version',
+                label: l10n?.get('appVersion') ?? 'App Version',
                 trailing: Text(
                   appSettings?.appVersion ?? '1.0.0',
                   maxLines: 1,
@@ -277,7 +287,8 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               _SettingsTile(
                 icon: Icons.code_outlined,
-                label: 'Developed by Krecht Solutions',
+                label: l10n?.get('developedByKrecht') ??
+                    'Developed by Krecht Solutions',
                 trailing: const SizedBox.shrink(),
               ),
             ],
@@ -290,15 +301,17 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // Shows the language picker and writes the selected language to the provider.
   void _showLanguageDialog(LanguageProvider languageProvider) {
+    final l10n = AppLocalizations.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
+        title: Text(l10n?.get('selectLanguage') ?? 'Select Language'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('English'),
+              title: Text(l10n?.english ?? 'English'),
               trailing: !languageProvider.isArabic
                   ? const Icon(Icons.check, color: AppColors.accentBlue)
                   : null,
@@ -308,7 +321,7 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             ListTile(
-              title: const Text('Arabic'),
+              title: Text(l10n?.arabic ?? 'Arabic'),
               trailing: languageProvider.isArabic
                   ? const Icon(Icons.check, color: AppColors.accentBlue)
                   : null,
@@ -324,16 +337,18 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showThemeDialog(AppProvider appProvider) {
+    final l10n = AppLocalizations.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Theme'),
+        title: Text(l10n?.get('selectTheme') ?? 'Select Theme'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _ThemeOptionTile(
-              title: 'Auto',
-              subtitle: 'Use phone settings',
+              title: l10n?.get('auto') ?? 'Auto',
+              subtitle: l10n?.get('usePhoneSettings') ?? 'Use phone settings',
               selected:
                   appProvider.themePreference == AppThemePreference.system,
               onTap: () {
@@ -342,8 +357,9 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             _ThemeOptionTile(
-              title: 'Light',
-              subtitle: 'Always use light mode',
+              title: l10n?.get('light') ?? 'Light',
+              subtitle:
+                  l10n?.get('alwaysLightMode') ?? 'Always use light mode',
               selected: appProvider.themePreference == AppThemePreference.light,
               onTap: () {
                 appProvider.setThemePreference(AppThemePreference.light);
@@ -351,8 +367,8 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             _ThemeOptionTile(
-              title: 'Dark',
-              subtitle: 'Always use dark mode',
+              title: l10n?.get('dark') ?? 'Dark',
+              subtitle: l10n?.get('alwaysDarkMode') ?? 'Always use dark mode',
               selected: appProvider.themePreference == AppThemePreference.dark,
               onTap: () {
                 appProvider.setThemePreference(AppThemePreference.dark);
@@ -363,6 +379,17 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+
+  String _localizedThemeLabel(AppProvider appProvider, AppLocalizations? l10n) {
+    switch (appProvider.themePreference) {
+      case AppThemePreference.light:
+        return l10n?.get('light') ?? 'Light';
+      case AppThemePreference.dark:
+        return l10n?.get('dark') ?? 'Dark';
+      case AppThemePreference.system:
+        return l10n?.get('auto') ?? 'Auto';
+    }
   }
 }
 

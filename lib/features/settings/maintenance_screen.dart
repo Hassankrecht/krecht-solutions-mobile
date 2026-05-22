@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 
 // Full-screen maintenance message shown when the backend disables the app.
@@ -7,6 +8,8 @@ class MaintenanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       body: Center(
@@ -29,28 +32,30 @@ class MaintenanceScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              const Text(
-                'Under Maintenance',
-                style: TextStyle(
+              Text(
+                l10n?.get('underMaintenance') ?? 'Under Maintenance',
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppColors.darkNavy,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'We\'re currently performing scheduled maintenance.',
+              Text(
+                l10n?.get('maintenanceMessage') ??
+                    'We\'re currently performing scheduled maintenance.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   color: AppColors.bodyText,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Please check back soon. We apologize for any inconvenience.',
+              Text(
+                l10n?.get('maintenanceCheckBack') ??
+                    'Please check back soon. We apologize for any inconvenience.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.bodyTextMuted,
                 ),
@@ -60,9 +65,9 @@ class MaintenanceScreen extends StatelessWidget {
                 color: AppColors.accentBlue,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'We\'ll be back shortly',
-                style: TextStyle(
+              Text(
+                l10n?.get('backShortly') ?? 'We\'ll be back shortly',
+                style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.bodyTextMuted,
                 ),

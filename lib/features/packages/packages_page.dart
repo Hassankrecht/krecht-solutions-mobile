@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -28,14 +29,15 @@ class _PackagesPageState extends State<PackagesPage> {
   @override
   Widget build(BuildContext context) {
     final languageProvider = context.watch<LanguageProvider>();
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
         backgroundColor: AppColors.darkNavy,
-        title: const Text(
-          'Pricing Packages',
-          style: TextStyle(
+        title: Text(
+          l10n?.get('pricingPackages') ?? 'Pricing Packages',
+          style: const TextStyle(
             color: AppColors.contrast,
             fontWeight: FontWeight.bold,
           ),
@@ -70,7 +72,7 @@ class _PackagesPageState extends State<PackagesPage> {
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () => pricingProvider.init(),
-                      child: const Text('Retry'),
+                      child: Text(l10n?.retry ?? 'Retry'),
                     ),
                   ],
                 ),
@@ -80,10 +82,10 @@ class _PackagesPageState extends State<PackagesPage> {
 
           if (pricingProvider.categories.isEmpty &&
               pricingProvider.packages.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'No packages available',
-                style: TextStyle(color: AppColors.bodyTextMuted),
+                l10n?.get('noPackagesAvailable') ?? 'No packages available',
+                style: const TextStyle(color: AppColors.bodyTextMuted),
               ),
             );
           }
@@ -141,6 +143,8 @@ class _PricingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
       child: Container(
@@ -177,7 +181,7 @@ class _PricingHeader extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Pricing Packages',
+                        l10n?.get('pricingPackages') ?? 'Pricing Packages',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.sectionTitle.copyWith(
@@ -187,7 +191,13 @@ class _PricingHeader extends StatelessWidget {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        '$packageCount package${packageCount == 1 ? '' : 's'} available',
+                        packageCount == 1
+                            ? (l10n?.get('packageAvailable') ??
+                                    '{count} package available')
+                                .replaceFirst('{count}', '$packageCount')
+                            : (l10n?.get('packagesAvailable') ??
+                                    '{count} packages available')
+                                .replaceFirst('{count}', '$packageCount'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.bodySmall.copyWith(
@@ -208,7 +218,7 @@ class _PricingHeader extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(right: 12),
                       child: _CategoryChip(
-                        label: 'All',
+                        label: l10n?.get('all') ?? 'All',
                         isSelected: selectedCategory == null,
                         onTap: onClearCategory,
                       ),
@@ -318,6 +328,8 @@ class _PackageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -344,9 +356,9 @@ class _PackageCard extends StatelessWidget {
                       color: AppColors.accentBlue,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
-                      'Featured',
-                      style: TextStyle(
+                    child: Text(
+                      l10n?.get('featured') ?? 'Featured',
+                      style: const TextStyle(
                         color: AppColors.contrast,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -385,8 +397,8 @@ class _PackageCard extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 44),
                   ),
-                  child: const Text(
-                    'View Details',
+                  child: Text(
+                    l10n?.get('viewDetails') ?? 'View Details',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

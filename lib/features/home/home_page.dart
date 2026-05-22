@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -121,6 +122,7 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -135,7 +137,10 @@ class _ErrorState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: Text(l10n?.retry ?? 'Retry'),
+            ),
           ],
         ),
       ),
@@ -162,6 +167,7 @@ class _ContactCTA extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>().appSettings;
+    final l10n = AppLocalizations.of(context);
     if (settings == null ||
         (settings.contactEmail.isEmpty &&
             settings.contactPhone.isEmpty &&
@@ -180,7 +186,7 @@ class _ContactCTA extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Need help with a project?',
+            l10n?.get('needHelpWithProject') ?? 'Need help with a project?',
             style: AppTextStyles.cardTitle.copyWith(
               color: AppColors.contrast,
               fontSize: 21,
@@ -188,7 +194,8 @@ class _ContactCTA extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Reach us directly by email, phone, or WhatsApp.',
+            l10n?.get('contactCtaBody') ??
+                'Reach us directly by email, phone, or WhatsApp.',
             style: AppTextStyles.body.copyWith(
               color: AppColors.contrast.withValues(alpha: 0.72),
               fontSize: 14,
@@ -202,7 +209,7 @@ class _ContactCTA extends StatelessWidget {
               if (settings.contactEmail.isNotEmpty)
                 _ContactAction(
                   icon: Icons.alternate_email_rounded,
-                  label: 'Email',
+                  label: l10n?.get('email') ?? 'Email',
                   onTap: () => _launch(
                     Uri(scheme: 'mailto', path: settings.contactEmail),
                   ),
@@ -210,7 +217,7 @@ class _ContactCTA extends StatelessWidget {
               if (settings.contactPhone.isNotEmpty)
                 _ContactAction(
                   icon: Icons.call_rounded,
-                  label: 'Call',
+                  label: l10n?.get('call') ?? 'Call',
                   onTap: () => _launch(
                     Uri(
                       scheme: 'tel',
@@ -221,7 +228,7 @@ class _ContactCTA extends StatelessWidget {
               if (settings.whatsappNumber.isNotEmpty)
                 _ContactAction(
                   icon: Icons.chat_rounded,
-                  label: 'WhatsApp',
+                  label: l10n?.get('whatsApp') ?? 'WhatsApp',
                   onTap: () => _launch(
                     Uri.parse(
                       'https://wa.me/${_digitsOnly(settings.whatsappNumber)}',
@@ -374,6 +381,7 @@ class _PricingPreviewState extends State<_PricingPreview> {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
+    final l10n = AppLocalizations.of(context);
     final visiblePackages = _filteredPackages;
     final previewPackages = visiblePackages.take(3).toList();
 
@@ -386,11 +394,14 @@ class _PricingPreviewState extends State<_PricingPreview> {
           spacing: 12,
           runSpacing: 8,
           children: [
-            Text('Pricing Packages', style: AppTextStyles.sectionTitle),
+            Text(
+              l10n?.get('pricingPackages') ?? 'Pricing Packages',
+              style: AppTextStyles.sectionTitle,
+            ),
             TextButton(
               onPressed: () =>
                   Navigator.of(context).pushNamed(AppRoutes.packages),
-              child: const Text('View All'),
+              child: Text(l10n?.get('viewAll') ?? 'View All'),
             ),
           ],
         ),
@@ -444,13 +455,15 @@ class _HomePricingCategoryFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SizedBox(
       height: 38,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
           _HomePricingCategoryChip(
-            label: 'All',
+            label: l10n?.get('all') ?? 'All',
             isSelected: selectedCategoryId == null,
             onTap: () => onSelected(null),
           ),
@@ -525,6 +538,8 @@ class _EmptyPricingFilterState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -534,7 +549,8 @@ class _EmptyPricingFilterState extends StatelessWidget {
         border: Border.all(color: AppColors.divider),
       ),
       child: Text(
-        'No packages in this category yet.',
+        l10n?.get('noPackagesInCategory') ??
+            'No packages in this category yet.',
         style: AppTextStyles.bodySmall.copyWith(color: AppColors.bodyTextMuted),
       ),
     );
@@ -550,9 +566,10 @@ class _PricingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final name = packageData.getLocalizedName(isArabic).isNotEmpty
         ? packageData.getLocalizedName(isArabic)
-        : 'Package';
+        : (l10n?.get('packageFallback') ?? 'Package');
     final category = packageData.getLocalizedCategory(isArabic);
     final features = packageData.getLocalizedFeatures(isArabic);
     final price = _formatPrice(packageData.formattedPrice);
@@ -602,9 +619,9 @@ class _PricingCard extends StatelessWidget {
                           color: AppColors.darkNavy,
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: const Text(
-                          'Featured',
-                          style: TextStyle(
+                        child: Text(
+                          l10n?.get('featured') ?? 'Featured',
+                          style: const TextStyle(
                             color: AppColors.contrast,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -699,6 +716,8 @@ class _HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
@@ -773,7 +792,8 @@ class _HeroSection extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Digital solutions, built cleanly',
+                                l10n?.get('digitalSolutionsTitle') ??
+                                    'Digital solutions, built cleanly',
                                 softWrap: true,
                                 style: AppTextStyles.cardTitle.copyWith(
                                   color: AppColors.contrast,
@@ -783,7 +803,8 @@ class _HeroSection extends StatelessWidget {
                               ),
                               const SizedBox(height: 7),
                               Text(
-                                'Apps, dashboards, websites, and systems.',
+                                l10n?.get('digitalSolutionsSubtitle') ??
+                                    'Apps, dashboards, websites, and systems.',
                                 softWrap: true,
                                 style: AppTextStyles.caption.copyWith(
                                   color: AppColors.contrast.withValues(
@@ -814,8 +835,9 @@ class _HeroSection extends StatelessWidget {
                                       fit: BoxFit.scaleDown,
                                       child: Text(
                                         isVeryCompact
-                                            ? 'Projects'
-                                            : 'Explore Projects',
+                                            ? (l10n?.projects ?? 'Projects')
+                                            : (l10n?.get('exploreProjects') ??
+                                                  'Explore Projects'),
                                       ),
                                     ),
                                     style: FilledButton.styleFrom(
@@ -880,6 +902,8 @@ class _ServicesPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
@@ -891,11 +915,14 @@ class _ServicesPreview extends StatelessWidget {
             spacing: 12,
             runSpacing: 8,
             children: [
-              Text('Our Services', style: AppTextStyles.sectionTitle),
+              Text(
+                l10n?.get('ourServices') ?? 'Our Services',
+                style: AppTextStyles.sectionTitle,
+              ),
               TextButton(
                 onPressed: () =>
                     Navigator.of(context).pushNamed(AppRoutes.services),
-                child: const Text('View All'),
+                child: Text(l10n?.get('viewAll') ?? 'View All'),
               ),
             ],
           ),
@@ -935,12 +962,26 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title =
-        service['title'] as String? ?? service['name'] as String? ?? '';
-    final description =
-        service['short_description'] as String? ??
-        service['description'] as String? ??
-        '';
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    final title = _localizedValue(
+      isArabic: isArabic,
+      fallback: service['title'] as String? ?? service['name'] as String? ?? '',
+      english: service['title_en'] as String? ?? service['name_en'] as String?,
+      arabic: service['title_ar'] as String? ?? service['name_ar'] as String?,
+    );
+    final description = _localizedValue(
+      isArabic: isArabic,
+      fallback:
+          service['short_description'] as String? ??
+          service['description'] as String? ??
+          '',
+      english:
+          service['short_description_en'] as String? ??
+          service['description_en'] as String?,
+      arabic:
+          service['short_description_ar'] as String? ??
+          service['description_ar'] as String?,
+    );
     final icon = service['icon'] as String? ?? '';
     final serviceIcon = _getIconForService(icon, title);
     final accent = _getColorForService(icon, title);
@@ -1003,6 +1044,16 @@ class _ServiceCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _localizedValue({
+    required bool isArabic,
+    required String fallback,
+    String? english,
+    String? arabic,
+  }) {
+    if (isArabic && arabic != null && arabic.isNotEmpty) return arabic;
+    return english != null && english.isNotEmpty ? english : fallback;
   }
 
   // Chooses a Material icon based on service keywords.
@@ -1069,6 +1120,8 @@ class _ProjectsPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1078,11 +1131,14 @@ class _ProjectsPreview extends StatelessWidget {
           spacing: 12,
           runSpacing: 8,
           children: [
-            Text('Featured Projects', style: AppTextStyles.sectionTitle),
+            Text(
+              l10n?.get('featuredProjects') ?? 'Featured Projects',
+              style: AppTextStyles.sectionTitle,
+            ),
             TextButton(
               onPressed: () =>
                   Navigator.of(context).pushNamed(AppRoutes.projects),
-              child: const Text('View All'),
+              child: Text(l10n?.get('viewAll') ?? 'View All'),
             ),
           ],
         ),
@@ -1113,14 +1169,16 @@ class _ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
     final imageUrl = project.image != null
         ? ImageHelper.buildImageUrl(project.image!)
         : null;
     final categories = project.categories;
     final category = project.category;
     final categoryName = categories != null && categories.isNotEmpty
-        ? categories.first.name
-        : (category?.name ?? '');
+        ? categories.first.getLocalizedName(isArabic)
+        : (category?.getLocalizedName(isArabic) ?? '');
+    final title = project.getLocalizedTitle(isArabic);
 
     return SizedBox(
       width: 292,
@@ -1204,7 +1262,7 @@ class _ProjectCard extends StatelessWidget {
                       ),
                     const SizedBox(height: 8),
                     Text(
-                      project.title,
+                      title,
                       style: AppTextStyles.cardTitle.copyWith(
                         color: AppColors.contrast,
                         fontSize: 20,

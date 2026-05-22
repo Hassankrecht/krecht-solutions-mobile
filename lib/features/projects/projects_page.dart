@@ -151,6 +151,8 @@ class _ProjectsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
       child: Container(
@@ -187,7 +189,7 @@ class _ProjectsHeader extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Our Work',
+                        l10n?.get('ourWork') ?? 'Our Work',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.sectionTitle.copyWith(
@@ -197,7 +199,13 @@ class _ProjectsHeader extends StatelessWidget {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        '$projectCount project${projectCount == 1 ? '' : 's'} available',
+                        projectCount == 1
+                            ? (l10n?.get('projectAvailable') ??
+                                    '{count} project available')
+                                .replaceFirst('{count}', '$projectCount')
+                            : (l10n?.get('projectsAvailable') ??
+                                    '{count} projects available')
+                                .replaceFirst('{count}', '$projectCount'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.bodySmall.copyWith(
@@ -241,6 +249,7 @@ class _CategoryMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const allValue = 'all';
     final selectedValue = selectedCategory?.id.toString() ?? allValue;
 
@@ -258,15 +267,15 @@ class _CategoryMenu extends StatelessWidget {
           icon: const Icon(Icons.keyboard_arrow_down_rounded),
           padding: const EdgeInsets.symmetric(horizontal: 14),
           items: [
-            const DropdownMenuItem<String>(
+            DropdownMenuItem<String>(
               value: allValue,
               child: Row(
                 children: [
-                  Icon(Icons.grid_view_rounded, size: 18),
-                  SizedBox(width: 10),
+                  const Icon(Icons.grid_view_rounded, size: 18),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'All categories',
+                      l10n?.get('allCategories') ?? 'All categories',
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -324,6 +333,7 @@ class _ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final imageUrl = _projectImageUrl(project);
     final title = project.getLocalizedTitle(isArabic);
     final description = _cardDescription(project, isArabic);
@@ -397,7 +407,7 @@ class _ProjectCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            'View details',
+                            l10n?.get('viewDetails') ?? 'View details',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.buttonLabel.copyWith(
@@ -553,19 +563,21 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final l10n = AppLocalizations.of(context);
+
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.folder_open_rounded,
             size: 64,
             color: AppColors.accentBlue,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'No projects yet',
-            style: TextStyle(
+            l10n?.get('noProjectsYet') ?? 'No projects yet',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppColors.darkNavy,
@@ -614,7 +626,7 @@ class _ErrorState extends StatelessWidget {
               ),
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../home/home_page.dart';
@@ -77,7 +78,7 @@ class _MainShellState extends State<MainShell> {
         actions: [
           if (!_isSearchOpen)
             IconButton(
-              tooltip: 'Search',
+              tooltip: AppLocalizations.of(context)?.search ?? 'Search',
               icon: const Icon(Icons.search_rounded, color: AppColors.contrast),
               onPressed: _openSearch,
             ),
@@ -194,7 +195,10 @@ class _InlineSearchField extends StatelessWidget {
         style: const TextStyle(color: AppColors.contrast, fontSize: 14),
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
-          hintText: 'Search projects, services, packages',
+          hintText: AppLocalizations.of(context)?.get(
+                'searchProjectsServicesPackages',
+              ) ??
+              'Search projects, services, packages',
           hintStyle: TextStyle(
             color: AppColors.contrast.withValues(alpha: 0.68),
             fontSize: 13,
@@ -205,7 +209,7 @@ class _InlineSearchField extends StatelessWidget {
             size: 20,
           ),
           suffixIcon: IconButton(
-            tooltip: 'Close search',
+            tooltip: AppLocalizations.of(context)?.close ?? 'Close search',
             icon: const Icon(
               Icons.close_rounded,
               color: AppColors.contrast,
@@ -308,6 +312,7 @@ class _NavBarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isSelected ? AppColors.accentBlue : AppColors.bodyTextMuted;
+    final label = _localizedLabel(context, item.label);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -325,7 +330,7 @@ class _NavBarItem extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            item.label,
+            label,
             style: TextStyle(
               fontSize: 11,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -346,5 +351,23 @@ class _NavBarItem extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _localizedLabel(BuildContext context, String label) {
+    final l10n = AppLocalizations.of(context);
+    switch (label) {
+      case 'Home':
+        return l10n?.home ?? label;
+      case 'Projects':
+        return l10n?.projects ?? label;
+      case 'Services':
+        return l10n?.services ?? label;
+      case 'Packages':
+        return l10n?.packages ?? label;
+      case 'More':
+        return l10n?.get('more') ?? label;
+      default:
+        return label;
+    }
   }
 }

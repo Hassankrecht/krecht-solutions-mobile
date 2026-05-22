@@ -125,7 +125,8 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                       const SizedBox(height: 20),
                       if (project.getLocalizedDescription(isArabic).isNotEmpty)
                         _SectionCard(
-                          title: 'Description',
+                          title: localizations?.get('description') ??
+                              'Description',
                           child: Text(
                             project.getLocalizedDescription(isArabic),
                             style: AppTextStyles.body,
@@ -219,6 +220,7 @@ class _ProjectSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final categoryName = _categoryName(project, categories, isArabic);
     final shortDescription = project.getLocalizedShortDescription(isArabic);
 
@@ -246,13 +248,13 @@ class _ProjectSummary extends StatelessWidget {
               if (project.client != null && project.client!.isNotEmpty)
                 _MetaPill(
                   icon: Icons.business_rounded,
-                  label: 'Client',
+                  label: localizations?.client ?? 'Client',
                   value: project.client!,
                 ),
               if (project.status != null && project.status!.isNotEmpty)
                 _MetaPill(
                   icon: Icons.task_alt_rounded,
-                  label: 'Status',
+                  label: localizations?.status ?? 'Status',
                   value: project.status!,
                 ),
             ],
@@ -272,9 +274,12 @@ class _ProjectSummary extends StatelessWidget {
                 ),
                 onPressed: () => onLaunchUrl(project.url!),
                 icon: const Icon(Icons.launch_rounded),
-                label: const Text(
-                  'View Project',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                label: Text(
+                  localizations?.get('viewProject') ?? 'View Project',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -326,7 +331,7 @@ class _GalleryStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SectionCard(
-      title: 'Gallery',
+      title: AppLocalizations.of(context)?.get('gallery') ?? 'Gallery',
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
       child: SizedBox(
         height: 94,
@@ -411,7 +416,11 @@ class _VideoCard extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Text('Project Video', style: AppTextStyles.subheading),
+            child: Text(
+              AppLocalizations.of(context)?.get('projectVideo') ??
+                  'Project Video',
+              style: AppTextStyles.subheading,
+            ),
           ),
           InkWell(
             borderRadius: BorderRadius.circular(AppTheme.radiusCard),
@@ -462,7 +471,10 @@ class _VideoCard extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Load project video',
+                          AppLocalizations.of(context)?.get(
+                                'loadProjectVideo',
+                              ) ??
+                              'Load project video',
                           style: AppTextStyles.subheading,
                         ),
                       ),
@@ -676,18 +688,19 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.folder_open_rounded,
             size: 64,
             color: AppColors.accentBlue,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'Project not found',
+            AppLocalizations.of(context)?.get('projectNotFound') ??
+                'Project not found',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -737,7 +750,7 @@ class _ErrorState extends StatelessWidget {
               ),
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
             ),
           ],
         ),
