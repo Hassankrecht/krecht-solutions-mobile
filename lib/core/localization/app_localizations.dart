@@ -221,6 +221,8 @@ class AppLocalizations {
       'all': 'الكل',
       'featured': 'مميز',
       'viewDetails': 'عرض التفاصيل',
+      'startingFrom': 'يبدأ من',
+      'priceOnRequest': 'السعر عند الطلب',
       'noPackagesAvailable': 'لا توجد باقات متاحة',
       'noPackagesInCategory': 'لا توجد باقات في هذه الفئة حالياً.',
       'packageFallback': 'باقة',
@@ -340,8 +342,7 @@ class AppLocalizations {
       'maintenance': 'الصيانة',
       'underMaintenance': 'قيد الصيانة',
       'maintenanceMessage': 'نقوم حالياً بإجراء صيانة مجدولة.',
-      'maintenanceCheckBack':
-          'يرجى العودة قريباً. نعتذر عن أي إزعاج.',
+      'maintenanceCheckBack': 'يرجى العودة قريباً. نعتذر عن أي إزعاج.',
       'backShortly': 'سنعود قريباً',
       'aboutUs': 'من نحن',
       'ourMission': 'مهمتنا',

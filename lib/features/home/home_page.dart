@@ -572,7 +572,7 @@ class _PricingCard extends StatelessWidget {
         : (l10n?.get('packageFallback') ?? 'Package');
     final category = packageData.getLocalizedCategory(isArabic);
     final features = packageData.getLocalizedFeatures(isArabic);
-    final price = _formatPrice(packageData.formattedPrice);
+    final price = _formatPrice(packageData.formattedPrice, context);
 
     return SizedBox(
       width: 252,
@@ -673,11 +673,11 @@ class _PricingCard extends StatelessWidget {
                     color: AppColors.accentBlue.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'View Details',
+                        l10n?.get('viewDetails') ?? 'View Details',
                         style: TextStyle(
                           color: AppColors.accentBlue,
                           fontSize: 12,
@@ -702,9 +702,10 @@ class _PricingCard extends StatelessWidget {
   }
 
   // Normalizes raw price strings before displaying them.
-  String _formatPrice(String value) {
+  String _formatPrice(String value, BuildContext context) {
     final trimmed = value.trim();
-    if (trimmed.isEmpty) return 'Price on request';
+    final l10n = AppLocalizations.of(context);
+    if (trimmed.isEmpty) return l10n?.get('priceOnRequest') ?? 'Price on request';
     if (trimmed.contains(RegExp(r'[A-Za-z$€£]'))) return trimmed;
     return '\$$trimmed';
   }
