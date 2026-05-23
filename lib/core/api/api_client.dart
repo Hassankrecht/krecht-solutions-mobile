@@ -14,8 +14,15 @@ class ApiClient {
 
   // ─── Internals ─────────────────────────────────────────────────────────────
 
-  // Builds common JSON headers for API requests.
-  Future<Map<String, String>> _headers() async {
+  // Builds headers for read-only API requests.
+  Future<Map<String, String>> _getHeaders() async {
+    return <String, String>{
+      'Accept': 'application/json',
+    };
+  }
+
+  // Builds JSON headers for API requests with a body.
+  Future<Map<String, String>> _jsonHeaders() async {
     return <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -51,7 +58,7 @@ class ApiClient {
     _isLoading = true;
     try {
       final res = await http
-          .get(_uri(path, query), headers: await _headers())
+          .get(_uri(path, query), headers: await _getHeaders())
           .timeout(AppConstants.connectTimeout);
       return _handleResponse(res);
     } on TimeoutException {
@@ -70,7 +77,11 @@ class ApiClient {
     _isLoading = true;
     try {
       final res = await http
-          .post(_uri(path), headers: await _headers(), body: jsonEncode(body))
+          .post(
+            _uri(path),
+            headers: await _jsonHeaders(),
+            body: jsonEncode(body),
+          )
           .timeout(AppConstants.connectTimeout);
       return _handleResponse(res);
     } on TimeoutException {
