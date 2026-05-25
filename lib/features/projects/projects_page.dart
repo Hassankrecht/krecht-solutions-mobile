@@ -7,10 +7,12 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/image_helper.dart';
 import '../../core/widgets/app_network_image.dart';
+import '../../core/widgets/social_links_row.dart';
 import '../../models/category_model.dart';
 import '../../models/project_model.dart';
 import '../../providers/language_provider.dart';
 import '../../providers/projects_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../routes/app_routes.dart';
 
 // Projects index page with category filtering and responsive project cards.
@@ -217,6 +219,8 @@ class _ProjectsHeader extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            const Center(child: _HeaderSocialLinks()),
             if (categories.isNotEmpty) ...[
               const SizedBox(height: 16),
               _CategoryMenu(
@@ -229,6 +233,28 @@ class _ProjectsHeader extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _HeaderSocialLinks extends StatelessWidget {
+  const _HeaderSocialLinks();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>().appSettings;
+    final whatsapp = settings?.whatsappNumber.trim() ?? '';
+
+    return SocialLinksRow(
+      facebookUrl: settings?.facebookUrl,
+      instagramUrl: settings?.instagramUrl,
+      linkedinUrl: settings?.linkedinUrl,
+      whatsappUrl: whatsapp.isNotEmpty
+          ? 'https://wa.me/${whatsapp.replaceAll(RegExp(r'[^0-9+]'), '')}'
+          : null,
+      style: SocialLinksStyle.filled,
+      iconSize: 18,
+      buttonSize: 40,
     );
   }
 }

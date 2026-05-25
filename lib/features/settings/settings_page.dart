@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/config/social_links.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../providers/app_provider.dart';
 import '../../providers/language_provider.dart';
 import '../../providers/settings_provider.dart';
@@ -111,6 +113,8 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          _CompanyHeader(appSettings: appSettings),
+          const SizedBox(height: 24),
           _SettingsGroup(
             title: l10n?.get('appConfiguration') ?? 'App Configuration',
             items: [
@@ -237,27 +241,52 @@ class _SettingsPageState extends State<SettingsPage> {
           _SettingsGroup(
             title: l10n?.get('social') ?? 'Social',
             items: [
-              if (appSettings?.facebookUrl != null &&
-                  appSettings!.facebookUrl!.isNotEmpty)
-                _SettingsTile(
-                  icon: Icons.facebook,
-                  label: 'Facebook',
-                  onTap: () => _launchUrl(appSettings.facebookUrl),
+              _SettingsTile(
+                icon: Icons.facebook_rounded,
+                label: l10n?.get('facebook') ?? 'Facebook',
+                onTap: () => _launchUrl(
+                  appSettings?.facebookUrl?.isNotEmpty == true
+                      ? appSettings!.facebookUrl!
+                      : SocialLinks.facebook,
                 ),
-              if (appSettings?.instagramUrl != null &&
-                  appSettings!.instagramUrl!.isNotEmpty)
-                _SettingsTile(
-                  icon: Icons.camera_alt,
-                  label: 'Instagram',
-                  onTap: () => _launchUrl(appSettings.instagramUrl),
+              ),
+              _SettingsTile(
+                icon: Icons.camera_alt_rounded,
+                label: l10n?.get('instagram') ?? 'Instagram',
+                onTap: () => _launchUrl(
+                  appSettings?.instagramUrl?.isNotEmpty == true
+                      ? appSettings!.instagramUrl!
+                      : SocialLinks.instagram,
                 ),
-              if (appSettings?.linkedinUrl != null &&
-                  appSettings!.linkedinUrl!.isNotEmpty)
-                _SettingsTile(
-                  icon: Icons.work,
-                  label: 'LinkedIn',
-                  onTap: () => _launchUrl(appSettings.linkedinUrl),
+              ),
+              _SettingsTile(
+                icon: Icons.music_video_rounded,
+                label: l10n?.get('tiktok') ?? 'TikTok',
+                onTap: () => _launchUrl(SocialLinks.tiktok),
+              ),
+              _SettingsTile(
+                icon: Icons.work_rounded,
+                label: l10n?.get('linkedin') ?? 'LinkedIn',
+                onTap: () => _launchUrl(
+                  appSettings?.linkedinUrl?.isNotEmpty == true
+                      ? appSettings!.linkedinUrl!
+                      : SocialLinks.linkedin,
                 ),
+              ),
+              _SettingsTile(
+                icon: Icons.code_rounded,
+                label: l10n?.get('github') ?? 'GitHub',
+                onTap: () => _launchUrl(SocialLinks.github),
+              ),
+              _SettingsTile(
+                icon: Icons.chat_rounded,
+                label: l10n?.get('whatsApp') ?? 'WhatsApp',
+                onTap: () => _launchUrl(
+                  appSettings?.whatsappNumber.isNotEmpty == true
+                      ? 'https://wa.me/${_digitsOnly(appSettings!.whatsappNumber)}'
+                      : SocialLinks.whatsapp,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -266,7 +295,8 @@ class _SettingsPageState extends State<SettingsPage> {
             items: [
               _SettingsTile(
                 icon: Icons.business_outlined,
-                label: l10n?.get('aboutKrechtSolutions') ??
+                label:
+                    l10n?.get('aboutKrechtSolutions') ??
                     'About Krecht Solutions',
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.about);
@@ -287,7 +317,8 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               _SettingsTile(
                 icon: Icons.code_outlined,
-                label: l10n?.get('developedByKrecht') ??
+                label:
+                    l10n?.get('developedByKrecht') ??
                     'Developed by Krecht Solutions',
                 trailing: const SizedBox.shrink(),
               ),
@@ -358,8 +389,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             _ThemeOptionTile(
               title: l10n?.get('light') ?? 'Light',
-              subtitle:
-                  l10n?.get('alwaysLightMode') ?? 'Always use light mode',
+              subtitle: l10n?.get('alwaysLightMode') ?? 'Always use light mode',
               selected: appProvider.themePreference == AppThemePreference.light,
               onTap: () {
                 appProvider.setThemePreference(AppThemePreference.light);
@@ -415,6 +445,69 @@ class _ThemeOptionTile extends StatelessWidget {
           ? const Icon(Icons.check, color: AppColors.accentBlue)
           : null,
       onTap: onTap,
+    );
+  }
+}
+
+// Company branding card shown at the top of the More/Settings page.
+class _CompanyHeader extends StatelessWidget {
+  const _CompanyHeader({required this.appSettings});
+
+  final dynamic appSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.darkNavy, AppColors.header],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 20,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Image.asset(
+            'assets/images/logo.png',
+            width: 172,
+            height: 64,
+            fit: BoxFit.contain,
+            errorBuilder: (_, _, _) => Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.accentBlue.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.auto_awesome_mosaic_rounded,
+                color: AppColors.accentBlue,
+                size: 30,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n?.get('developedByKrecht') ?? 'Developed by Krecht Solutions',
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.contrast.withValues(alpha: 0.68),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }

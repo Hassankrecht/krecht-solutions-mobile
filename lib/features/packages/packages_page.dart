@@ -1,13 +1,15 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/social_links_row.dart';
 import '../../models/pricing_category_model.dart';
 import '../../models/pricing_package_model.dart';
 import '../../providers/pricing_provider.dart';
 import '../../providers/language_provider.dart';
+import '../../providers/settings_provider.dart';
 
 // Pricing packages page with category filtering and responsive package cards.
 class PackagesPage extends StatefulWidget {
@@ -209,34 +211,21 @@ class _PricingHeader extends StatelessWidget {
                 ),
               ],
             ),
-            if (categories.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: _CategoryChip(
-                        label: l10n?.get('all') ?? 'All',
-                        isSelected: selectedCategory == null,
-                        onTap: onClearCategory,
-                      ),
-                    ),
-                    ...categories.map(
-                      (category) => Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: _CategoryChip(
-                          label: category.getLocalizedName(isArabic),
-                          isSelected: selectedCategory?.id == category.id,
-                          onTap: () => onCategorySelected(category),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            const SizedBox(height: 16),
+            const Center(child: _HeaderSocialLinks()),
+            const SizedBox(height: 16),
+            _CategoryMenu(
+              categories: categories,
+              selectedCategory: selectedCategory,
+              isArabic: isArabic,
+              onChanged: (category) {
+                if (category == null) {
+                  onClearCategory();
+                } else {
+                  onCategorySelected(category);
+                }
+              },
+            ),
           ],
         ),
       ),
@@ -244,38 +233,107 @@ class _PricingHeader extends StatelessWidget {
   }
 }
 
-// Selectable pricing category chip.
-class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
+class _HeaderSocialLinks extends StatelessWidget {
+  const _HeaderSocialLinks();
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.accentBlue : AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.accentBlue : AppColors.divider,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? AppColors.contrast : AppColors.bodyText,
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          ),
+    final settings = context.watch<SettingsProvider>().appSettings;
+    final whatsapp = settings?.whatsappNumber.trim() ?? '';
+
+    return SocialLinksRow(
+      facebookUrl: settings?.facebookUrl,
+      instagramUrl: settings?.instagramUrl,
+      linkedinUrl: settings?.linkedinUrl,
+      whatsappUrl: whatsapp.isNotEmpty
+          ? 'https://wa.me/${whatsapp.replaceAll(RegExp(r'[^0-9+]'), '')}'
+          : null,
+      style: SocialLinksStyle.filled,
+      iconSize: 18,
+      buttonSize: 40,
+    );
+  }
+}
+
+// Dropdown filter that switches between all packages and one category.
+class _CategoryMenu extends StatelessWidget {
+  const _CategoryMenu({
+    required this.categories,
+    required this.selectedCategory,
+    required this.isArabic,
+    required this.onChanged,
+  });
+
+  final List<PricingCategoryModel> categories;
+  final PricingCategoryModel? selectedCategory;
+  final bool isArabic;
+  final ValueChanged<PricingCategoryModel?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    const allValue = 'all';
+    final selectedValue = selectedCategory?.id.toString() ?? allValue;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedValue,
+          isExpanded: true,
+          borderRadius: BorderRadius.circular(8),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          items: [
+            DropdownMenuItem<String>(
+              value: allValue,
+              child: Row(
+                children: [
+                  const Icon(Icons.grid_view_rounded, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      l10n?.get('allCategories') ?? 'All categories',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ...categories.map(
+              (category) => DropdownMenuItem<String>(
+                value: category.id.toString(),
+                child: Row(
+                  children: [
+                    const Icon(Icons.category_rounded, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        category.getLocalizedName(isArabic),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          onChanged: (value) {
+            if (value == null || value == allValue) {
+              onChanged(null);
+              return;
+            }
+            for (final category in categories) {
+              if (category.id.toString() == value) {
+                onChanged(category);
+                return;
+              }
+            }
+          },
         ),
       ),
     );
@@ -305,7 +363,7 @@ class _PackagesSection extends StatelessWidget {
           return SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: columns,
-              mainAxisExtent: 330,
+              mainAxisExtent: 396,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
             ),
@@ -319,7 +377,7 @@ class _PackagesSection extends StatelessWidget {
   }
 }
 
-// One pricing package card including featured state, description, and CTA.
+// One pricing package card including featured state, feature list, and CTA.
 class _PackageCard extends StatelessWidget {
   const _PackageCard({required this.package, required this.isArabic});
 
@@ -329,84 +387,146 @@ class _PackageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final features = package.getLocalizedFeatures(isArabic);
+    final description = package.getLocalizedDescription(isArabic);
+    final isFeatured = package.isFeatured == true;
 
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        boxShadow: AppTheme.cardShadow,
-        border: package.isFeatured == true
+        boxShadow: isFeatured ? AppTheme.elevatedShadow : AppTheme.cardShadow,
+        border: isFeatured
             ? Border.all(color: AppColors.accentBlue, width: 2)
-            : null,
+            : Border.all(color: AppColors.divider),
       ),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                if (package.isFeatured == true)
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.accentBlue.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.inventory_2_rounded,
+                    color: AppColors.accentBlue,
+                    size: 22,
+                  ),
+                ),
+                const Spacer(),
+                if (isFeatured)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
+                      horizontal: 10,
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.accentBlue,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
                       l10n?.get('featured') ?? 'Featured',
                       style: const TextStyle(
                         color: AppColors.contrast,
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                const SizedBox(height: 12),
-                Text(
-                  package.getLocalizedName(isArabic),
-                  style: AppTextStyles.cardTitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  package.getLocalizedDescription(isArabic),
-                  style: AppTextStyles.bodySmall,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Spacer(),
-                Text(
-                  package.formattedPrice,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.heroTitleMobile.copyWith(
-                    color: AppColors.accentBlue,
-                    fontSize: 28,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/contact');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 44),
-                  ),
-                  child: Text(
-                    l10n?.get('viewDetails') ?? 'View Details',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+            Text(
+              package.getLocalizedName(isArabic),
+              style: AppTextStyles.cardTitle.copyWith(fontSize: 20),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (description.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                description,
+                style: AppTextStyles.bodySmall,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+            const SizedBox(height: 12),
+            Text(
+              package.formattedPrice,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.heroTitleMobile.copyWith(
+                color: AppColors.accentBlue,
+                fontSize: 26,
+              ),
+            ),
+            if (features.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              const Divider(color: AppColors.divider, height: 1),
+              const SizedBox(height: 12),
+              ...features.take(4).map(
+                (feature) => Padding(
+                  padding: const EdgeInsets.only(bottom: 7),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        size: 16,
+                        color: AppColors.accentBlue,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          feature,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.bodyText,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            const Spacer(),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/contact');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isFeatured
+                      ? AppColors.accentBlue
+                      : AppColors.darkNavy,
+                  foregroundColor: AppColors.contrast,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  l10n?.get('viewDetails') ?? 'View Details',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

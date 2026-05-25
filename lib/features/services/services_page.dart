@@ -4,8 +4,10 @@ import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/social_links_row.dart';
 import '../../providers/language_provider.dart';
 import '../../providers/services_provider.dart';
+import '../../providers/settings_provider.dart';
 
 // Services index page that loads services and displays them in a responsive grid.
 class ServicesPage extends StatefulWidget {
@@ -121,56 +123,84 @@ class _ServicesHeader extends StatelessWidget {
           border: Border.all(color: AppColors.contrast.withValues(alpha: 0.08)),
           boxShadow: AppTheme.cardShadow,
         ),
-        child: Row(
+        child: Column(
           children: [
-            Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: AppColors.accentBlue.withValues(alpha: 0.16),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: AppColors.contrast.withValues(alpha: 0.10),
+            Row(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: AppColors.accentBlue.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.contrast.withValues(alpha: 0.10),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: AppColors.accentBlue,
+                    size: 28,
+                  ),
                 ),
-              ),
-              child: const Icon(
-                Icons.auto_awesome_rounded,
-                color: AppColors.accentBlue,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n?.get('professionalServices') ??
-                        'Professional Services',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.sectionTitle.copyWith(
-                      color: AppColors.contrast,
-                      fontSize: 24,
-                    ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n?.get('professionalServices') ??
+                            'Professional Services',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.sectionTitle.copyWith(
+                          color: AppColors.contrast,
+                          fontSize: 24,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        (l10n?.get('solutionsReady') ??
+                                '{count} solutions ready for your business')
+                            .replaceFirst('{count}', '$count'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.contrast.withValues(alpha: 0.72),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    (l10n?.get('solutionsReady') ??
-                            '{count} solutions ready for your business')
-                        .replaceFirst('{count}', '$count'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.contrast.withValues(alpha: 0.72),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+            const SizedBox(height: 16),
+            const Center(child: _HeaderSocialLinks()),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _HeaderSocialLinks extends StatelessWidget {
+  const _HeaderSocialLinks();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>().appSettings;
+    final whatsapp = settings?.whatsappNumber.trim() ?? '';
+
+    return SocialLinksRow(
+      facebookUrl: settings?.facebookUrl,
+      instagramUrl: settings?.instagramUrl,
+      linkedinUrl: settings?.linkedinUrl,
+      whatsappUrl: whatsapp.isNotEmpty
+          ? 'https://wa.me/${whatsapp.replaceAll(RegExp(r'[^0-9+]'), '')}'
+          : null,
+      style: SocialLinksStyle.filled,
+      iconSize: 18,
+      buttonSize: 40,
     );
   }
 }

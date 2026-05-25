@@ -30,7 +30,16 @@ class PricingProvider extends ChangeNotifier {
 
   // Loads categories and packages together for pricing screens.
   Future<void> init() async {
-    await Future.wait([fetchCategories(), fetchPackages()]);
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await Future.wait([fetchCategories(), fetchPackages()]);
+      _mergeCategoriesFromPackages();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   // Fetches pricing categories used by package filters.
@@ -65,6 +74,7 @@ class PricingProvider extends ChangeNotifier {
             ),
           )
           .toList();
+      _mergeCategoriesFromPackages();
       notifyListeners();
     } on ApiException catch (e) {
       _error = e.message;
@@ -106,6 +116,40 @@ class PricingProvider extends ChangeNotifier {
   void clearSelectedCategory() {
     _selectedCategory = null;
     notifyListeners();
+  }
+
+  // Uses package relation data as a fallback when the categories endpoint is empty.
+  void _mergeCategoriesFromPackages() {
+    if (_categories.isNotEmpty || _packages.isEmpty) return;
+
+    final categoriesById = <int, PricingCategoryModel>{};
+    for (final package in _packages) {
+      final rawCategoryId = package.pricingCategory?['id'];
+      final relatedCategoryId = rawCategoryId is num
+          ? rawCategoryId.toInt()
+          : int.tryParse(rawCategoryId?.toString() ?? '');
+      final categoryId = package.pricingCategoryId ?? relatedCategoryId;
+      if (categoryId == null || categoryId == 0) continue;
+
+      final category = package.pricingCategory;
+      categoriesById.putIfAbsent(
+        categoryId,
+        () => PricingCategoryModel(
+          id: categoryId,
+          name: category?['name']?.toString() ?? package.category,
+          nameEn: category?['name_en']?.toString() ?? package.categoryEn,
+          nameAr: category?['name_ar']?.toString() ?? package.categoryAr,
+          slug: category?['slug']?.toString(),
+          description: category?['description']?.toString(),
+          descriptionEn: category?['description_en']?.toString(),
+          descriptionAr: category?['description_ar']?.toString(),
+        ),
+      );
+    }
+
+    if (categoriesById.isNotEmpty) {
+      _categories = categoriesById.values.toList();
+    }
   }
 
   // Searches packages by name or description.

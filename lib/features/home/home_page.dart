@@ -7,6 +7,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/image_helper.dart';
 import '../../core/widgets/app_network_image.dart';
+import '../../core/widgets/social_links_row.dart';
 import '../../models/pricing_category_model.dart';
 import '../../models/pricing_package_model.dart';
 import '../../models/project_model.dart';
@@ -705,15 +706,40 @@ class _PricingCard extends StatelessWidget {
   String _formatPrice(String value, BuildContext context) {
     final trimmed = value.trim();
     final l10n = AppLocalizations.of(context);
-    if (trimmed.isEmpty) return l10n?.get('priceOnRequest') ?? 'Price on request';
+    if (trimmed.isEmpty) {
+      return l10n?.get('priceOnRequest') ?? 'Price on request';
+    }
     if (trimmed.contains(RegExp(r'[A-Za-z$€£]'))) return trimmed;
     return '\$$trimmed';
   }
 }
 
 // Top hero card for the home screen.
-class _HeroSection extends StatelessWidget {
+class _HeroSection extends StatefulWidget {
   const _HeroSection();
+
+  @override
+  State<_HeroSection> createState() => _HeroSectionState();
+}
+
+class _HeroSectionState extends State<_HeroSection>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _floatController;
+
+  @override
+  void initState() {
+    super.initState();
+    _floatController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4200),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -721,175 +747,695 @@ class _HeroSection extends StatelessWidget {
 
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isCompact = constraints.maxWidth < 360;
-            final isVeryCompact = constraints.maxWidth < 300;
+            final width = constraints.maxWidth;
+            final isMobile = width < 720;
+            final isTablet = width >= 720 && width < 1024;
+            final isVeryCompact = width < 340;
+            final horizontalPadding = isVeryCompact
+                ? 18.0
+                : isMobile
+                ? 24.0
+                : isTablet
+                ? 34.0
+                : 44.0;
+            final verticalPadding = isMobile ? 26.0 : 42.0;
+            final titleSize = isVeryCompact
+                ? 30.0
+                : isMobile
+                ? 36.0
+                : isTablet
+                ? 44.0
+                : 52.0;
 
-            return Container(
-              constraints: BoxConstraints(minHeight: isCompact ? 188 : 176),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(isCompact ? 18 : 22),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.darkNavy, AppColors.header],
+            return TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 620),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 18 * (1 - value)),
+                    child: child,
+                  ),
+                );
+              },
+              child: Container(
+                constraints: BoxConstraints(minHeight: isMobile ? 0 : 430),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(isMobile ? 24 : 30),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF071727),
+                      Color(0xFF102D4D),
+                      AppColors.darkNavy,
+                    ],
+                    stops: [0, 0.54, 1],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.darkNavy.withValues(alpha: 0.32),
+                      blurRadius: 34,
+                      offset: const Offset(0, 18),
+                    ),
+                  ],
                 ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: AppColors.shadowMedium,
-                    blurRadius: 24,
-                    offset: Offset(0, 12),
-                  ),
-                ],
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: -18,
-                    top: 18,
-                    child: Container(
-                      width: 82,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: AppColors.accentBlue.withValues(alpha: 0.34),
-                        borderRadius: BorderRadius.circular(4),
+                clipBehavior: Clip.antiAlias,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: -80,
+                      top: -90,
+                      child: _HeroGlow(
+                        size: isMobile ? 190 : 260,
+                        color: AppColors.accentBlue.withValues(alpha: 0.24),
                       ),
                     ),
-                  ),
-                  if (!isVeryCompact)
                     Positioned(
-                      right: 14,
-                      top: 46,
-                      child: Container(
-                        width: 54,
-                        height: 18,
+                      right: isMobile ? -80 : -40,
+                      bottom: isMobile ? 70 : -54,
+                      child: _HeroGlow(
+                        size: isMobile ? 220 : 320,
+                        color: const Color(0xFF49E6FF).withValues(alpha: 0.18),
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: AppColors.contrast.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ),
-                  if (!isCompact)
-                    Positioned(
-                      right: 24,
-                      bottom: 18,
-                      child: Icon(
-                        Icons.dashboard_customize_rounded,
-                        size: 54,
-                        color: AppColors.contrast.withValues(alpha: 0.18),
-                      ),
-                    ),
-                  Padding(
-                    padding: EdgeInsets.all(isCompact ? 14 : 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                l10n?.get('digitalSolutionsTitle') ??
-                                    'Digital solutions, built cleanly',
-                                softWrap: true,
-                                style: AppTextStyles.cardTitle.copyWith(
-                                  color: AppColors.contrast,
-                                  fontSize: isCompact ? 19 : 23,
-                                  height: 1.14,
-                                ),
-                              ),
-                              const SizedBox(height: 7),
-                              Text(
-                                l10n?.get('digitalSolutionsSubtitle') ??
-                                    'Apps, dashboards, websites, and systems.',
-                                softWrap: true,
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.contrast.withValues(
-                                    alpha: 0.72,
-                                  ),
-                                  height: 1.35,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxWidth: isVeryCompact
-                                      ? double.infinity
-                                      : 190,
-                                ),
-                                child: SizedBox(
-                                  width: isVeryCompact ? double.infinity : null,
-                                  height: 38,
-                                  child: FilledButton.icon(
-                                    onPressed: () => Navigator.of(
-                                      context,
-                                    ).pushNamed(AppRoutes.projects),
-                                    icon: const Icon(
-                                      Icons.workspaces_rounded,
-                                      size: 16,
-                                    ),
-                                    label: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Text(
-                                        isVeryCompact
-                                            ? (l10n?.projects ?? 'Projects')
-                                            : (l10n?.get('exploreProjects') ??
-                                                  'Explore Projects'),
-                                      ),
-                                    ),
-                                    style: FilledButton.styleFrom(
-                                      backgroundColor: AppColors.accentBlue,
-                                      foregroundColor: AppColors.contrast,
-                                      textStyle: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: isCompact ? 10 : 12,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppColors.contrast.withValues(alpha: 0.05),
+                              Colors.transparent,
                             ],
                           ),
                         ),
-                        if (!isCompact) ...[
-                          const SizedBox(width: 12),
-                          Container(
-                            width: 56,
-                            height: 76,
-                            decoration: BoxDecoration(
-                              color: AppColors.contrast.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: AppColors.contrast.withValues(
-                                  alpha: 0.12,
-                                ),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.rocket_launch_rounded,
-                              color: AppColors.accentBlue,
-                              size: 30,
-                            ),
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                        vertical: verticalPadding,
+                      ),
+                      child: isMobile
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _HeroCopy(
+                                  l10n: l10n,
+                                  titleSize: titleSize,
+                                  isVeryCompact: isVeryCompact,
+                                ),
+                                const SizedBox(height: 28),
+                                _HeroVisual(
+                                  controller: _floatController,
+                                  compact: true,
+                                ),
+                              ],
+                            )
+                          : Row(
+                              children: [
+                                Expanded(
+                                  flex: isTablet ? 10 : 11,
+                                  child: _HeroCopy(
+                                    l10n: l10n,
+                                    titleSize: titleSize,
+                                    isVeryCompact: false,
+                                  ),
+                                ),
+                                SizedBox(width: isTablet ? 26 : 42),
+                                Expanded(
+                                  flex: isTablet ? 9 : 10,
+                                  child: _HeroVisual(
+                                    controller: _floatController,
+                                    compact: false,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _HeroCopy extends StatelessWidget {
+  const _HeroCopy({
+    required this.l10n,
+    required this.titleSize,
+    required this.isVeryCompact,
+  });
+
+  final AppLocalizations? l10n;
+  final double titleSize;
+  final bool isVeryCompact;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 620),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.contrast.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: AppColors.contrast.withValues(alpha: 0.14),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentBlue.withValues(alpha: 0.18),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) => const Icon(
+                Icons.auto_awesome_mosaic_rounded,
+                color: AppColors.accentBlue,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            l10n?.get('digitalSolutionsTitle') ??
+                'Digital solutions, built cleanly',
+            softWrap: true,
+            style: AppTextStyles.heroTitle.copyWith(
+              fontSize: titleSize,
+              height: 1.06,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+              color: AppColors.contrast,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            l10n?.get('digitalSolutionsSubtitle') ??
+                'Apps, dashboards, websites, and systems.',
+            softWrap: true,
+            style: AppTextStyles.heroSubtitle.copyWith(
+              fontSize: isVeryCompact ? 16 : 18,
+              height: 1.55,
+              fontWeight: FontWeight.w500,
+              color: AppColors.contrast.withValues(alpha: 0.78),
+            ),
+          ),
+          const SizedBox(height: 28),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final projectButton = SizedBox(
+                height: 50,
+                child: FilledButton.icon(
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed(AppRoutes.projects),
+                  icon: const Icon(Icons.workspaces_rounded, size: 19),
+                  label: Text(
+                    isVeryCompact
+                        ? (l10n?.projects ?? 'Projects')
+                        : (l10n?.get('exploreProjects') ?? 'Explore Projects'),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accentBlue,
+                    foregroundColor: AppColors.contrast,
+                    elevation: 0,
+                    shadowColor: AppColors.accentBlue.withValues(alpha: 0.32),
+                    textStyle: AppTextStyles.buttonLabel.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              );
+              final servicesButton = SizedBox(
+                height: 50,
+                child: OutlinedButton.icon(
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed(AppRoutes.services),
+                  icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+                  label: Text(
+                    isVeryCompact
+                        ? (l10n?.services ?? 'Services')
+                        : (l10n?.get('ourServices') ?? 'Our Services'),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.contrast,
+                    side: BorderSide(
+                      color: AppColors.contrast.withValues(alpha: 0.22),
+                    ),
+                    textStyle: AppTextStyles.buttonLabel.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              );
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(child: projectButton),
+                  const SizedBox(width: 12),
+                  Flexible(child: servicesButton),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 18),
+          const Center(child: _HomeSocialLinks()),
+        ],
+      ),
+    );
+  }
+}
+
+// Social media shortcuts shown in the home hero.
+class _HomeSocialLinks extends StatelessWidget {
+  const _HomeSocialLinks();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>().appSettings;
+    final whatsapp = settings?.whatsappNumber.trim() ?? '';
+
+    return SocialLinksRow(
+      facebookUrl: settings?.facebookUrl,
+      instagramUrl: settings?.instagramUrl,
+      linkedinUrl: settings?.linkedinUrl,
+      whatsappUrl: whatsapp.isNotEmpty
+          ? 'https://wa.me/${whatsapp.replaceAll(RegExp(r'[^0-9+]'), '')}'
+          : null,
+      style: SocialLinksStyle.filled,
+      iconSize: 18,
+      buttonSize: 40,
+    );
+  }
+}
+
+class _HeroVisual extends StatelessWidget {
+  const _HeroVisual({required this.controller, required this.compact});
+
+  final Animation<double> controller;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        final lift = 10 * controller.value;
+
+        return Transform.translate(offset: Offset(0, -lift), child: child);
+      },
+      child: SizedBox(
+        height: compact ? 318 : 330,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(
+              top: compact ? 24 : 34,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.contrast.withValues(alpha: 0.14),
+                      AppColors.contrast.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: AppColors.contrast.withValues(alpha: 0.16),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.22),
+                      blurRadius: 36,
+                      offset: const Offset(0, 20),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(compact ? 14 : 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: AppColors.accentBlue.withValues(
+                                alpha: 0.16,
+                              ),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: AppColors.accentBlue.withValues(
+                                  alpha: 0.32,
+                                ),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.dashboard_customize_rounded,
+                              color: AppColors.accentBlue,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: compact ? 118 : 148,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.contrast.withValues(
+                                      alpha: 0.78,
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  width: compact ? 84 : 104,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.contrast.withValues(
+                                      alpha: 0.28,
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: compact ? 16 : 22),
+                      Row(
+                        children: const [
+                          Expanded(
+                            child: _MetricCard(
+                              icon: Icons.trending_up_rounded,
+                              value: '98%',
+                              label: 'Uptime',
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: _MetricCard(
+                              icon: Icons.bolt_rounded,
+                              value: '4.8x',
+                              label: 'Faster',
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: compact ? 14 : 18),
+                      const _DashboardRow(
+                        icon: Icons.phone_iphone_rounded,
+                        label: 'Mobile app',
+                        progress: 0.82,
+                      ),
+                      SizedBox(height: compact ? 10 : 12),
+                      const _DashboardRow(
+                        icon: Icons.web_asset_rounded,
+                        label: 'Web platform',
+                        progress: 0.68,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: compact ? 10 : 22,
+              top: 0,
+              child: Container(
+                width: compact ? 92 : 112,
+                height: compact ? 92 : 112,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF071727).withValues(alpha: 0.72),
+                  borderRadius: BorderRadius.circular(26),
+                  border: Border.all(
+                    color: AppColors.accentBlue.withValues(alpha: 0.32),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentBlue.withValues(alpha: 0.24),
+                      blurRadius: 30,
+                      offset: const Offset(0, 14),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(compact ? 14 : 18),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const Icon(
+                      Icons.auto_awesome_mosaic_rounded,
+                      color: AppColors.accentBlue,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: compact ? 4 : -18,
+              bottom: compact ? 8 : 18,
+              child: Container(
+                width: compact ? 150 : 178,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.contrast.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.22),
+                      blurRadius: 26,
+                      offset: const Offset(0, 16),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.accentBlue.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.layers_rounded,
+                        color: AppColors.accentBlue,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Launch ready',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.darkNavy,
+                              fontWeight: FontWeight.w800,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: AppColors.accentBlue.withValues(
+                                alpha: 0.22,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            alignment: AlignmentDirectional.centerStart,
+                            child: FractionallySizedBox(
+                              widthFactor: 0.72,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.accentBlue,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MetricCard extends StatelessWidget {
+  const _MetricCard({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF071727).withValues(alpha: 0.34),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.contrast.withValues(alpha: 0.10)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColors.accentBlue, size: 19),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: AppTextStyles.cardTitle.copyWith(
+              color: AppColors.contrast,
+              fontSize: 23,
+              height: 1,
+              letterSpacing: 0,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.contrast.withValues(alpha: 0.58),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DashboardRow extends StatelessWidget {
+  const _DashboardRow({
+    required this.icon,
+    required this.label,
+    required this.progress,
+  });
+
+  final IconData icon;
+  final String label;
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: AppColors.contrast.withValues(alpha: 0.72), size: 18),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 92,
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.contrast.withValues(alpha: 0.68),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: AppColors.contrast.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            alignment: AlignmentDirectional.centerStart,
+            child: FractionallySizedBox(
+              widthFactor: progress,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accentBlue, Color(0xFF65E8FF)],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroGlow extends StatelessWidget {
+  const _HeroGlow({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)]),
       ),
     );
   }

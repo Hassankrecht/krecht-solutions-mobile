@@ -171,6 +171,15 @@ class AppLocalizations {
       'ourServicesBody':
           'We specialize in web development, mobile app development, cloud solutions, UI/UX design, and digital transformation consulting.',
 
+      // Social
+      'followUs': 'Follow Us',
+      'connectWithUs': 'Connect with us on social media',
+      'tiktok': 'TikTok',
+      'github': 'GitHub',
+      'facebook': 'Facebook',
+      'instagram': 'Instagram',
+      'linkedin': 'LinkedIn',
+
       // Common
       'save': 'Save',
       'cancel': 'Cancel',
@@ -352,6 +361,15 @@ class AppLocalizations {
           'تمكين الأعمال بحلول تقنية مبتكرة تدفع النمو والكفاءة والنجاح في السوق الرقمية.',
       'ourServicesBody':
           'نتخصص في تطوير المواقع وتطبيقات الهاتف والحلول السحابية وتصميم واجهات وتجارب المستخدم واستشارات التحول الرقمي.',
+
+      // Social
+      'followUs': 'تابعنا',
+      'connectWithUs': 'تواصل معنا على وسائل التواصل الاجتماعي',
+      'tiktok': 'تيك توك',
+      'github': 'GitHub',
+      'facebook': 'فيسبوك',
+      'instagram': 'إنستغرام',
+      'linkedin': 'لينكدإن',
 
       // Common
       'save': 'حفظ',

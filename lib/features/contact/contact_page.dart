@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/config/social_links.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/social_links_row.dart';
 import '../../providers/settings_provider.dart';
 
 // Contact screen with a submit form and optional company contact details.
@@ -216,10 +218,9 @@ class _ContactPageState extends State<ContactPage> {
               label: l10n?.get('fullName') ?? 'Full Name',
               icon: Icons.person_outline,
               action: TextInputAction.next,
-              validator: (v) =>
-                  v == null || v.trim().isEmpty
-                      ? (l10n?.get('nameRequired') ?? 'Name is required')
-                      : null,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? (l10n?.get('nameRequired') ?? 'Name is required')
+                  : null,
             ),
             const SizedBox(height: 14),
             _Field(
@@ -228,11 +229,9 @@ class _ContactPageState extends State<ContactPage> {
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
               action: TextInputAction.next,
-              validator: (v) =>
-                  v == null || !v.contains('@')
-                      ? (l10n?.get('validEmailRequired') ??
-                            'Enter a valid email')
-                      : null,
+              validator: (v) => v == null || !v.contains('@')
+                  ? (l10n?.get('validEmailRequired') ?? 'Enter a valid email')
+                  : null,
             ),
             const SizedBox(height: 14),
             _Field(
@@ -300,6 +299,10 @@ class _ContactPageState extends State<ContactPage> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+            ),
+            const SizedBox(height: 28),
+            _SocialContactSection(
+              settings: context.watch<SettingsProvider>().appSettings,
             ),
           ],
         ),
@@ -396,6 +399,58 @@ class _SuccessState extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Social links section shown below the contact form.
+class _SocialContactSection extends StatelessWidget {
+  const _SocialContactSection({required this.settings});
+
+  final dynamic settings;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n?.get('followUs') ?? 'Follow Us',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkNavy,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n?.get('connectWithUs') ?? 'Connect with us on social media',
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.bodyTextMuted,
+            ),
+          ),
+          const SizedBox(height: 14),
+          SocialLinksRow(
+            facebookUrl: settings?.facebookUrl,
+            instagramUrl: settings?.instagramUrl,
+            linkedinUrl: settings?.linkedinUrl,
+            whatsappUrl: settings?.whatsappNumber?.isNotEmpty == true
+                ? 'https://wa.me/${settings!.whatsappNumber}'
+                : SocialLinks.whatsapp,
+          ),
+        ],
       ),
     );
   }

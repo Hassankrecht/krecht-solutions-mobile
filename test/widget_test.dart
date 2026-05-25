@@ -6,6 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:solutions_app/app.dart';
@@ -36,4 +37,72 @@ void main() {
     // Verify that the app loads without errors
     expect(find.byType(App), findsOneWidget);
   });
+
+  testWidgets('Home layout fits desktop viewport', (WidgetTester tester) async {
+    await _pumpAppAtSize(tester, const Size(1440, 900));
+
+    expect(find.byType(App), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home layout fits mobile viewport', (WidgetTester tester) async {
+    await _pumpAppAtSize(tester, const Size(390, 844));
+
+    expect(find.byType(App), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home layout fits narrow web viewport', (
+    WidgetTester tester,
+  ) async {
+    await _pumpAppAtSize(tester, const Size(320, 720));
+
+    expect(find.byType(App), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+}
+
+Future<void> _pumpAppAtSize(WidgetTester tester, Size size) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  await tester.pumpWidget(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider<ProjectsProvider>(
+          create: (_) => _NoopProjectsProvider(),
+        ),
+        ChangeNotifierProvider<ServicesProvider>(
+          create: (_) => _NoopServicesProvider(),
+        ),
+        ChangeNotifierProvider<PricingProvider>(
+          create: (_) => _NoopPricingProvider(),
+        ),
+      ],
+      child: const App(),
+    ),
+  );
+
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 800));
+}
+
+class _NoopServicesProvider extends ServicesProvider {
+  @override
+  Future<void> fetchServices() async {}
+}
+
+class _NoopProjectsProvider extends ProjectsProvider {
+  @override
+  Future<void> fetchProjects({bool refresh = false}) async {}
+}
+
+class _NoopPricingProvider extends PricingProvider {
+  @override
+  Future<void> init() async {}
 }
